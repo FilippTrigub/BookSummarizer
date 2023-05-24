@@ -115,9 +115,11 @@ class Summarizer:
 
 if __name__ == '__main__':
     summaries = Summarizer().summarize_book(
-        'transcriptions/Getting_To_Yes_Negotiating_Agreement_Without_Giving_In_Roger_Fisher_&_William_Ury.txt',
+        'transcriptions/test.txt',
         '<Part \d+\.>',
-        'Getting To Yes Negotiating Agreement Without Giving In')
-    save_text_to_file(os.path.join('summaries',
-                                   'Getting_To_Yes_Negotiating_Agreement_Without_Giving_In_Roger_Fisher_&_William_Ury.txt'),
-                      summaries)
+        'Test')
+    save_text_to_file(
+        os.path.join(
+            'summaries',
+            'test.txt'),
+        summaries)
