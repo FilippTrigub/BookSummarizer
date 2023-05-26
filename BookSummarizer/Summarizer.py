@@ -3,12 +3,13 @@ import re
 import time
 
 import tiktoken
-from transformers import AutoTokenizer, AutoModelForCausalLM
+import openai
 
 from BookSummarizer.Transcriber import save_text_to_file
 
 
 class Summarizer:
+    TOKENS_USED = 0
 
     def summarize_book(self, filename, delimiter, book_title):
         self.book_title = book_title
@@ -24,7 +25,7 @@ class Summarizer:
             summaries = self._summarize_parts(summaries)
         if len(summaries) > 1:
             print('Summarization did not converge.')
-        return summaries
+        return summaries, self.TOKENS_USED, len(text)
 
     def _summarize_parts(self, parts):
         summaries = []
@@ -49,10 +50,10 @@ class Summarizer:
         return parts
 
     @staticmethod
-    def _num_tokens_from_string(string: str, encoding_name: str = None) -> int:
+    def _num_tokens_from_string(string: str, model_name: str = None) -> int:
         """Returns the number of tokens in a text string."""
-        encoding_name = "gpt-3.5-turbo" if not encoding_name else encoding_name
-        encoding = tiktoken.get_encoding(encoding_name)
+        model_name = "gpt-3.5-turbo" if not model_name else model_name
+        encoding = tiktoken.encoding_for_model(model_name)
         num_tokens = len(encoding.encode(string))
         return num_tokens
 
@@ -75,6 +76,15 @@ class Summarizer:
             return [part]
         else:
             return self.split_into_chunks(part)
+
+    def generate_completion(self, prompt):
+        response = openai.Completion.create(
+            engine="text-davinci-002",
+            prompt=prompt,
+            temperature=0.2,
+            max_tokens=1000
+        )
+        return response.choices[0].text.strip()
 
     def _summarize_chunk(self, chunk):
         prompt = f"""
@@ -100,7 +110,7 @@ class Summarizer:
         """
 
         # todo use palm2 model
-        vertex_api_key = 'AIzaSyCBqlTdxhHY6e42-Lg3vCgXKjVGihZKUXQ'
+        # vertex_api_key = 'AIzaSyCBqlTdxhHY6e42-Lg3vCgXKjVGihZKUXQ'
         # tokenizer = AutoTokenizer.from_pretrained("bigscience/bloom")
         # model = AutoModelForCausalLM.from_pretrained("bigscience/bloom",
         #                                              device_map="auto",
@@ -110,11 +120,16 @@ class Summarizer:
         # summary = tokenizer.decode(model.generate(inputs["input_ids"],
         #                                           max_length=4000
         #                                           )[0])
+
+        summary = self.generate_completion(prompt)
+        self.TOKENS_USED += self._num_tokens_from_string(prompt)
         return summary
 
 
 if __name__ == '__main__':
-    summaries = Summarizer().summarize_book(
+    os.chdir('..')
+    openai.api_key = "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"
+    summaries, tokens_used, text_length = Summarizer().summarize_book(
         'transcriptions/test.txt',
         '<Part \d+\.>',
         'Test')
@@ -123,3 +138,6 @@ if __name__ == '__main__':
             'summaries',
             'test.txt'),
         summaries)
+    print(f"Used up {tokens_used} tokens.\n"
+          f"This is {tokens_used * 0.02 / 1000} $\n"
+          f"This is {tokens_used * 0.02 / 1000 / text_length * 1000} $ per 1000 characters.")

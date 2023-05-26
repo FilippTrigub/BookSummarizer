@@ -41,9 +41,15 @@ class Transcriber:
 
 
 def save_text_to_file(filename, transcriptions):
-    with open(filename, 'w') as file:
-        for text in transcriptions:
-            file.write(text)
+    try:
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, 'w') as file:
+            for text in transcriptions:
+                file.write(text)
+        return True
+    except Exception as e:
+        print(f"An error occurred while saving the file: {str(e)}")
+        return False
 
 
 if __name__ == '__main__':
