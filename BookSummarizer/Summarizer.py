@@ -1,3 +1,4 @@
+import copy
 import os
 import re
 import time
@@ -17,15 +18,16 @@ class Summarizer:
         text = self._get_text(filename)
         parts = self._split_in_parts(text, delimiter)
         parts = self._clean_parts(parts)
-        summaries = self._summarize_parts(parts)
+        summaries_of_parts = self._summarize_parts(parts)
 
+        summary_of_book = copy.deepcopy(summaries_of_parts)
         timeout = time.time() + 60 * 5
         max_loops = 5
-        while len(summaries) > 1 and max_loops > 0 and time.time() < timeout:
-            summaries = self._summarize_parts(summaries)
-        if len(summaries) > 1:
+        while len(summary_of_book) > 1 and max_loops > 0 and time.time() < timeout:
+            summary_of_book = self._summarize_parts(summary_of_book)
+        if len(summary_of_book) > 1:
             print('Summarization did not converge.')
-        return summaries, self.TOKENS_USED, len(text)
+        return summary_of_book, summaries_of_parts, self.TOKENS_USED, len(text)
 
     def _summarize_parts(self, parts):
         summaries = []
@@ -129,15 +131,31 @@ class Summarizer:
 if __name__ == '__main__':
     os.chdir('..')
     openai.api_key = "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"
-    summaries, tokens_used, text_length = Summarizer().summarize_book(
+    summary_of_book, summaries_of_parts, tokens_used, text_length = Summarizer().summarize_book(
         'transcriptions/test.txt',
         '<Part \d+\.>',
         'Test')
+
     save_text_to_file(
         os.path.join(
             'summaries',
-            'test.txt'),
-        summaries)
+            f'test_{summary_of_book}.txt'),
+        summary_of_book)
+    save_text_to_file(
+        os.path.join(
+            'summaries',
+            f'test_{summaries_of_parts}.txt'),
+        summaries_of_parts)
+
     print(f"Used up {tokens_used} tokens.\n"
           f"This is {tokens_used * 0.02 / 1000} $\n"
           f"This is {tokens_used * 0.02 / 1000 / text_length * 1000} $ per 1000 characters.")
+    save_text_to_file(
+        os.path.join('openai_costs', 'test.txt'),
+        {'book_title': 'Test',
+         'tokens_used': tokens_used,
+         'costs': tokens_used * 0.02 / 1000,
+         'costs_per_1000_characters': tokens_used * 0.02 / 1000 / text_length * 1000}
+    )
+
+# may 29th total usage 0.03 $
