@@ -2,6 +2,7 @@ import copy
 import os
 import re
 import time
+from typing import List, Union, Tuple
 
 import tiktoken
 import openai
@@ -14,8 +15,13 @@ class Summarizer:
 
     DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS = 5
     DEFAULT_TIMEOUT_IN_MIN_PER_100000_CHARS = 5
+    MODEL_NAME = "text-davinci-002"
+    TOKEN_THRESHOLD = 4000
 
-    def summarize_book(self, filename, delimiter, book_title):
+    def __init__(self):
+        self.book_title = None
+
+    def summarize_book(self, filename: str, delimiter: str, book_title: str):
         self.book_title = book_title
 
         text = self._get_text(filename)
@@ -24,12 +30,12 @@ class Summarizer:
 
         return summary_of_book, summaries_of_parts, self.TOKENS_USED, len(text)
 
-    def summarize_parts(self, text, delimiter):
+    def summarize_parts(self, text: str, delimiter: str) -> List[str]:
         parts = self._split_in_parts(text, delimiter)
         parts = self._clean_parts(parts)
         return self._summarize_parts(parts)
 
-    def _summarize_parts(self, parts):
+    def _summarize_parts(self, parts: List[str]) -> List[str]:
         summaries_of_parts = []
         for part in parts:
             chunks = self._split_in_chunks(part)
@@ -39,7 +45,7 @@ class Summarizer:
             summaries_of_parts.append(summary_of_part)
         return summaries_of_parts
 
-    def summarize_summaries_of_parts(self, summaries_of_parts, len_text):
+    def summarize_summaries_of_parts(self, summaries_of_parts: List[str], len_text: int) -> List[str]:
         timeout, loop_threshold = self._set_loop_threshold_and_timeout(len_text)
 
         while len(summaries_of_parts) > 1 and loop_threshold > 0 and time.time() < timeout:
@@ -58,20 +64,23 @@ class Summarizer:
 
         return summaries_of_parts
 
-    def _set_loop_threshold_and_timeout(self, len_text):
+    def _set_loop_threshold_and_timeout(self, len_text: int) -> Tuple[float, int]:
         timeout = time.time() + 60 * self.DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS * len_text
         loop_threshold = self.DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS * len_text
         return timeout, loop_threshold
 
-    def _get_text(self, filename):
+    @staticmethod
+    def _get_text(filename: str) -> str:
         with open(filename, 'r') as file:
             text = file.read()
         return text
 
-    def _split_in_parts(self, text, delimiter):
+    @staticmethod
+    def _split_in_parts(text: str, delimiter: str) -> List[str]:
         return text.split(delimiter)
 
-    def _clean_parts(self, parts):
+    @staticmethod
+    def _clean_parts(parts: List[str]) -> List[str]:
         # todo implement
         return parts
 
@@ -83,7 +92,7 @@ class Summarizer:
         num_tokens = len(encoding.encode(string))
         return num_tokens
 
-    def split_into_chunks(self, text):
+    def split_into_chunks(self, text: str) -> List[str]:
         sentences = re.split('(?<=[.!?]) +', text)
         chunks = []
         chunk = ""
@@ -97,22 +106,22 @@ class Summarizer:
             chunks.append(chunk)
         return chunks
 
-    def _split_in_chunks(self, part):
-        if self._num_tokens_from_string(part) < 4000:
+    def _split_in_chunks(self, part: str) -> List[str]:
+        if self._num_tokens_from_string(part) < self.TOKEN_THRESHOLD:
             return [part]
         else:
             return self.split_into_chunks(part)
 
-    def generate_completion(self, prompt):
+    def generate_completion(self, prompt: str):
         response = openai.Completion.create(
-            engine="text-davinci-002",
+            engine=self.MODEL_NAME,
             prompt=prompt,
             temperature=0.2,
             max_tokens=1000
         )
         return response.choices[0].text.strip()
 
-    def _summarize_chunk(self, chunk):
+    def _summarize_chunk(self, chunk: str):
         prompt = f"""
             You are a Language AI. 
             You will be given a text, which is part of the book {self.book_title}. 
