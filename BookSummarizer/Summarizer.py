@@ -12,17 +12,22 @@ from BookSummarizer.Transcriber import save_text_to_file
 class Summarizer:
     TOKENS_USED = 0
 
+    DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS = 5
+    DEFAULT_TIMEOUT_IN_MIN_PER_100000_CHARS = 5
+
     def summarize_book(self, filename, delimiter, book_title):
         self.book_title = book_title
 
         text = self._get_text(filename)
-        parts = self._split_in_parts(text, delimiter)
-        parts = self._clean_parts(parts)
-        summaries_of_parts = self._summarize_parts(parts)
-
-        summary_of_book = self.summarize_summaries_of_parts(copy.deepcopy(summaries_of_parts))
+        summaries_of_parts = self.summarize_parts(text, delimiter)
+        summary_of_book = self.summarize_summaries_of_parts(copy.deepcopy(summaries_of_parts), len(text))
 
         return summary_of_book, summaries_of_parts, self.TOKENS_USED, len(text)
+
+    def summarize_parts(self, text, delimiter):
+        parts = self._split_in_parts(text, delimiter)
+        parts = self._clean_parts(parts)
+        return self._summarize_parts(parts)
 
     def _summarize_parts(self, parts):
         summaries_of_parts = []
@@ -33,6 +38,30 @@ class Summarizer:
                 summary_of_part = summary_of_part + self._summarize_chunk(chunk) + '\n'
             summaries_of_parts.append(summary_of_part)
         return summaries_of_parts
+
+    def summarize_summaries_of_parts(self, summaries_of_parts, len_text):
+        timeout, loop_threshold = self._set_loop_threshold_and_timeout(len_text)
+
+        while len(summaries_of_parts) > 1 and loop_threshold > 0 and time.time() < timeout:
+            # with iterations, chunks should get smaller so that list of summaries gets smaller
+            # until only 1 element remains.
+            summaries_of_parts = self._summarize_parts(summaries_of_parts)
+            loop_threshold -= 1
+            if loop_threshold == 0 or time.time() > timeout:
+                print('Loop count exceeded or timeout reached.')
+                reset = input('Reset parameters and continue? (y/n)')
+                if reset == 'y':
+                    timeout, loop_threshold = self._set_loop_threshold_and_timeout(len_text)
+
+        if len(summaries_of_parts) > 1:
+            print('Summarization did not converge.')
+
+        return summaries_of_parts
+
+    def _set_loop_threshold_and_timeout(self, len_text):
+        timeout = time.time() + 60 * self.DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS * len_text
+        loop_threshold = self.DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS * len_text
+        return timeout, loop_threshold
 
     def _get_text(self, filename):
         with open(filename, 'r') as file:
@@ -122,25 +151,6 @@ class Summarizer:
         self.TOKENS_USED += self._num_tokens_from_string(prompt)
         return summary
 
-    def summarize_summaries_of_parts(self, summaries_of_parts):
-        # 5 min timeout todo adapt to length
-        timeout = time.time() + 60 * 5
-        # 5 loops todo adapt to length
-        max_loops = 5
-        while len(summaries_of_parts) > 1 and max_loops > 0 and time.time() < timeout:
-            # with iterations, chunks should get smaller so that list of summaries gets smaller
-            # until only 1 element remains.
-            summaries_of_parts = self._summarize_parts(summaries_of_parts)
-            max_loops -= 1
-            if max_loops == 0 or time.time() > timeout:
-                print('Loop count exceeded or timeout reached.')
-                reset = input('Reset parameters and continue? (y/n)')
-                if reset == 'y':
-                    max_loops = 5
-                    timeout = time.time() + 60 * 5
-        if len(summaries_of_parts) > 1:
-            print('Summarization did not converge.')
-        return summaries_of_parts
 
 if __name__ == '__main__':
     os.chdir('..')
