@@ -131,6 +131,13 @@ class Summarizer:
             # with iterations, chunks should get smaller so that list of summaries gets smaller
             # until only 1 element remains.
             summaries_of_parts = self._summarize_parts(summaries_of_parts)
+            max_loops -= 1
+            if max_loops == 0 or time.time() > timeout:
+                print('Loop count exceeded or timeout reached.')
+                reset = input('Reset parameters and continue? (y/n)')
+                if reset == 'y':
+                    max_loops = 5
+                    timeout = time.time() + 60 * 5
         if len(summaries_of_parts) > 1:
             print('Summarization did not converge.')
         return summaries_of_parts
