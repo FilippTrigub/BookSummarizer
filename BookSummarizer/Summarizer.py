@@ -20,24 +20,19 @@ class Summarizer:
         parts = self._clean_parts(parts)
         summaries_of_parts = self._summarize_parts(parts)
 
-        summary_of_book = copy.deepcopy(summaries_of_parts)
-        timeout = time.time() + 60 * 5
-        max_loops = 5
-        while len(summary_of_book) > 1 and max_loops > 0 and time.time() < timeout:
-            summary_of_book = self._summarize_parts(summary_of_book)
-        if len(summary_of_book) > 1:
-            print('Summarization did not converge.')
+        summary_of_book = self.summarize_summaries_of_parts(copy.deepcopy(summaries_of_parts))
+
         return summary_of_book, summaries_of_parts, self.TOKENS_USED, len(text)
 
     def _summarize_parts(self, parts):
-        summaries = []
+        summaries_of_parts = []
         for part in parts:
             chunks = self._split_in_chunks(part)
-            summary = ''
+            summary_of_part = ''
             for chunk in chunks:
-                summary = summary + self._summarize_chunk(chunk) + '\n'
-            summaries.append(summary)
-        return summaries
+                summary_of_part = summary_of_part + self._summarize_chunk(chunk) + '\n'
+            summaries_of_parts.append(summary_of_part)
+        return summaries_of_parts
 
     def _get_text(self, filename):
         with open(filename, 'r') as file:
@@ -127,6 +122,18 @@ class Summarizer:
         self.TOKENS_USED += self._num_tokens_from_string(prompt)
         return summary
 
+    def summarize_summaries_of_parts(self, summaries_of_parts):
+        # 5 min timeout todo adapt to length
+        timeout = time.time() + 60 * 5
+        # 5 loops todo adapt to length
+        max_loops = 5
+        while len(summaries_of_parts) > 1 and max_loops > 0 and time.time() < timeout:
+            # with iterations, chunks should get smaller so that list of summaries gets smaller
+            # until only 1 element remains.
+            summaries_of_parts = self._summarize_parts(summaries_of_parts)
+        if len(summaries_of_parts) > 1:
+            print('Summarization did not converge.')
+        return summaries_of_parts
 
 if __name__ == '__main__':
     os.chdir('..')
@@ -153,6 +160,7 @@ if __name__ == '__main__':
     save_text_to_file(
         os.path.join('openai_costs', 'test.txt'),
         {'book_title': 'Test',
+         'text_length': text_length,
          'tokens_used': tokens_used,
          'costs': tokens_used * 0.02 / 1000,
          'costs_per_1000_characters': tokens_used * 0.02 / 1000 / text_length * 1000}
