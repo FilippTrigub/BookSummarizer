@@ -144,18 +144,6 @@ class Summarizer:
             {chunk}
         """
 
-        # todo use palm2 model
-        # vertex_api_key = 'AIzaSyCBqlTdxhHY6e42-Lg3vCgXKjVGihZKUXQ'
-        # tokenizer = AutoTokenizer.from_pretrained("bigscience/bloom")
-        # model = AutoModelForCausalLM.from_pretrained("bigscience/bloom",
-        #                                              device_map="auto",
-        #                                              torch_dtype='auto')
-        #
-        # inputs = tokenizer(prompt, return_tensors="pt")
-        # summary = tokenizer.decode(model.generate(inputs["input_ids"],
-        #                                           max_length=4000
-        #                                           )[0])
-
         summary = self.generate_completion(prompt)
         self.TOKENS_USED += self._num_tokens_from_string(prompt)
         return summary
@@ -163,7 +151,7 @@ class Summarizer:
 
 if __name__ == '__main__':
     os.chdir('..')
-    openai.api_key = "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"
+    openai.api_key = "YOUR_API_KEY"
     summary_of_book, summaries_of_parts, tokens_used, text_length = Summarizer().summarize_book(
         'transcriptions/test.txt',
         '<Part \d+\.>',
