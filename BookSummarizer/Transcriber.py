@@ -1,4 +1,6 @@
+import json
 import os
+from typing import List, Dict
 
 import whisper
 from dotenv import load_dotenv
@@ -40,7 +42,7 @@ class Transcriber:
             return transcriptions
 
 
-def save_text_to_file(filename, transcriptions):
+def save_list_to_file(filename: str, transcriptions: List[str]):
     try:
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, 'w') as file:
@@ -52,6 +54,15 @@ def save_text_to_file(filename, transcriptions):
         return False
 
 
+def save_dict_to_file(filename: str, dictionary: Dict[str, str]):
+    try:
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, 'w') as file:
+            json.dump(dictionary, file)
+    except Exception as e:
+        print(f"Failed to save dictionary: {e}")
+
+
 if __name__ == '__main__':
 
     audiobooks = [file for file in os.listdir('audiobooks') if file.endswith('.mp3')]
@@ -60,4 +71,4 @@ if __name__ == '__main__':
 
     for audiobook in audiobooks:
         transcriptions = transcriber.transcribe(os.path.join('audiobooks', audiobook))
-        save_text_to_file(os.path.join('transcriptions', audiobook.replace('.mp3', '.txt')), transcriptions)
+        save_list_to_file(os.path.join('transcriptions', audiobook.replace('.mp3', '.txt')), transcriptions)
