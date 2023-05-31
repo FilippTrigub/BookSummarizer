@@ -9,6 +9,7 @@ import tiktoken
 import openai
 from dotenv import load_dotenv
 
+from BookSummarizer.AIGenerator import AIGenerator, GPTGenerator, PalmGenerator
 from BookSummarizer.Transcriber import save_list_to_file, save_dict_to_file
 
 
@@ -25,6 +26,14 @@ class Summarizer:
     def __init__(self):
         self.book_title = None
         self.TOKEN_THRESHOLD = float(os.getenv('CASH_THRESHOLD')) * 1000 / 0.02
+
+        self.model_provider = os.getenv("GENERATOR_MODEL_PROVIDER")
+        if self.model_provider == "openai":
+            self.ai_generator = GPTGenerator()
+        elif self.model_provider == "google":
+            self.ai_generator = PalmGenerator()
+        else:
+            raise ValueError(f"Unknown model provider {self.model_provider}")
 
     def summarize_book(self, filename: str, delimiter: str, book_title: str):
         self.book_title = book_title
@@ -131,10 +140,10 @@ class Summarizer:
 
                 OUTPUT FORMAT: \n\n
                 Summary: \n
-                1: xxx.\n 
-                2: xxx.\n 
+                1. xxx.\n 
+                2. xxx.\n 
                 ...\n  
-                N: xxx.\n\n     
+                N. xxx.\n\n     
 
                 Be sure to use statements as concise and precise as possible. 
                 Review the answer to make sure it fits the format.                 
@@ -157,10 +166,10 @@ class Summarizer:
 
                 OUTPUT FORMAT: \n\n
                 Summary: \n
-                1: xxx.\n 
-                2: xxx.\n 
+                1. xxx.\n 
+                2. xxx.\n 
                 ...\n  
-                N: xxx.\n\n     
+                N. xxx.\n\n     
 
                 Be sure to use statements as concise and precise as possible. 
                 Review the answer to make sure it fits the format.                 
@@ -169,7 +178,7 @@ class Summarizer:
                 {chunk}
             """
 
-        summary = self.generate_completion(prompt)
+        summary = self.ai_generator.generate_completion(prompt)
         self.TOKENS_USED += self._num_tokens_from_string(prompt)
         return summary
 
@@ -240,7 +249,6 @@ if __name__ == '__main__':
     load_dotenv()
     timestamp = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
 
-    openai.api_key = os.getenv('OPENAI_API_KEY')
     book_file_name = 'Getting_To_Yes_Negotiating_Agreement_Without_Giving_In_Roger_Fisher_and_William_Ury.txt'
     # book_file_name = 'test.txt'
 
