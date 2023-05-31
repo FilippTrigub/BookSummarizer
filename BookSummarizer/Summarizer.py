@@ -30,46 +30,32 @@ class Summarizer:
         self.book_title = book_title
 
         text = self._get_text(filename)
+
+        print("Summarizing parts")
         summaries_of_parts = self.summarize_parts(text, delimiter)
+
+        print("Summarizing book")
         summary_of_book = self.summarize_summaries_of_parts(copy.deepcopy(summaries_of_parts), len(text))
 
+        print("Summarizing book finished. Formatting summary")
         summary_of_book, summaries_of_parts = self.format_summaries(summary_of_book, summaries_of_parts)
+
         return summary_of_book, summaries_of_parts, self.TOKENS_USED, len(text)
 
     def summarize_summaries_of_parts(self, summaries_of_parts: List[str], len_text: int) -> str:
+        print("Summarizing summaries of parts")
         # Summarize summaries of parts initially
-        summary_of_book = self.summarize_part('\n'.join(summaries_of_parts), True)
-
-        # Prepare while loop:
-        # Split in chunks, loop only of summary longer than 1 chunk
-        joined_summaries_in_chunks = self.split_into_chunks(summary_of_book)
-        # Set timeout and loop threshold
-        timeout, loop_threshold = self._set_loop_threshold_and_timeout(len_text)
-        while len(joined_summaries_in_chunks) > 1 \
-                and loop_threshold > 0 \
-                and time.time() < timeout \
-                and self.TOKENS_USED < self.TOKEN_THRESHOLD:
-            # with iterations, chunks should get smaller so that list of summaries gets smaller
-            # until only 1 element remains.
-            summary_of_book = self.summarize_part('\n'.join(joined_summaries_in_chunks), True)
-            joined_summaries_in_chunks = self.split_into_chunks(summary_of_book)
-
-            loop_threshold -= 1
-            if loop_threshold == 0 or time.time() > timeout:
-                print('Loop count exceeded or timeout reached.')
-                reset = input('Reset parameters and continue? (y/n)')
-                if reset == 'y':
-                    timeout, loop_threshold = self._set_loop_threshold_and_timeout(len_text)
-            if self.TOKENS_USED > self.TOKEN_THRESHOLD:
-                print(f'Used up {self.TOKENS_USED}.')
-                reset = input('Double threshold? (y/n)')
-                if reset == 'y':
-                    self.TOKEN_THRESHOLD *= 2
-
-        if len(joined_summaries_in_chunks) > 1:
-            print('Summarization did not converge.')
+        summary_of_book = self.summarize_concatenated_summaries(summaries_of_parts, True)
+        # Loop recursively until only a short summary is left
+        summary_of_book = self._summarize_recursively(summary_of_book, len_text)
 
         return summary_of_book
+
+    def summarize_concatenated_summaries(self, chunks: List[str], summarize_summaries: bool = False) -> str:
+        summary_of_part = ''
+        for chunk in chunks:
+            summary_of_part = summary_of_part + self._summarize_chunk(chunk, summarize_summaries) + '\n'
+        return summary_of_part
 
     def summarize_parts(self, text: str, delimiter: str) -> List[str]:
         parts = self._split_in_parts(text, delimiter)
@@ -79,23 +65,63 @@ class Summarizer:
     def _summarize_parts(self, parts: List[str]) -> List[str]:
         summaries_of_parts = []
         for part in parts:
+            print(f'Summarizing part {parts.index(part) + 1} of {len(parts)}')
             summaries_of_parts.append(self.summarize_part(part))
         return summaries_of_parts
 
-    def summarize_part(self, part: str, summarize_summaries: bool = False) -> str:
-        chunks = self._split_in_chunks(part)
-        summary_of_part = ''
-        for chunk in chunks:
-            summary_of_part = summary_of_part + self._summarize_chunk(chunk, summarize_summaries) + '\n'
+    def summarize_part(self, part: str) -> str:
+        if len(self._split_in_chunks(part)) == 1:
+            # Summarize summaries of parts initially
+            summary_of_part = self._summarize_chunk(part, False)
+        else:
+            # Loop recursively until only a short summary is left
+            summary_of_part = self._summarize_recursively(part, len(part))
         return summary_of_part
+
+    def _summarize_recursively(self, summary: str, len_text: int) -> str:
+        # Prepare while loop:
+        # Split in chunks, loop only of summary longer than 1 chunk
+        chunks = self.split_into_chunks(summary)
+        # Set timeout and loop threshold
+        timeout, loop_threshold = self._set_loop_threshold_and_timeout(len_text)
+        while (len(chunks) > 1 or summary.count('Summary') > 1) \
+                and loop_threshold > 0 \
+                and time.time() < timeout \
+                and self.TOKENS_USED < self.TOKEN_THRESHOLD:
+            print(f"Running recursive summarization. "
+                  f"Loop {loop_threshold}/{self.DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS}.")
+            # with iterations, chunks should get smaller so that list of summaries gets smaller
+            # until only 1 element remains.
+            summary = self.summarize_concatenated_summaries(chunks, True)
+            chunks = self.split_into_chunks(summary)
+
+            loop_threshold -= 1
+            if loop_threshold == 0 or time.time() > timeout:
+                if loop_threshold == 0:
+                    print('Loop count exceeded.')
+                else:
+                    print('Timeout reached.')
+                reset = input('Reset parameters and continue? (y/n)')
+                if reset == 'y':
+                    timeout, loop_threshold = self._set_loop_threshold_and_timeout(len_text)
+            if self.TOKENS_USED > self.TOKEN_THRESHOLD:
+                print(f'Used up {self.TOKENS_USED}.')
+                reset = input('Double threshold? (y/n)')
+                if reset == 'y':
+                    self.TOKEN_THRESHOLD *= 2
+
+        if len(chunks) > 1:
+            print('Summarization did not converge.')
+
+        return summary
 
     def _summarize_chunk(self, chunk: str, summarize_summaries: bool = False) -> str:
         if summarize_summaries:
             prompt = f"""
                 You are a Summarizer AI. 
-                You will be given a list of chapter summaries of the book {self.book_title}. 
+                You will be given a list of summaries of parts of the book {self.book_title}. 
                 Your task is to merge these summaries.
-                You should use more than 50 bullet points.
+                You should use 20 bullet points.
                 Summarize according to the following four points.
                 - What are the main statements in the text?
                 - What is the core problem the author addresses?
@@ -104,13 +130,14 @@ class Summarizer:
                 Follow the output format under any circumstances.                  
 
                 OUTPUT FORMAT: \n\n
-                Summary: \n\n
-                1: xxx\n 
-                2: xxx\n 
+                Summary: \n
+                1: xxx.\n 
+                2: xxx.\n 
                 ...\n  
-                N: xxx\n\n     
+                N: xxx.\n\n     
 
-                Be sure to use statements as concise and academic as possible, do not have too much repetitive information.                 
+                Be sure to use statements as concise and precise as possible. 
+                Review the answer to make sure it fits the format.                 
 
                 INPUT TEXT: \n\n
                 {chunk}
@@ -122,20 +149,21 @@ class Summarizer:
                 You will be given a text, which is part of the book {self.book_title}. 
                 Your task is to summarize the text in 10 points.
                 Summarize according to the following four points.
-                - (1): What are the main statements in the text?
-                - (2): What is the core problem the author addresses?
-                - (3): What are points of nuance the author highlights?
-                - (4): What are open questions the author points out?
+                - What are the main statements in the text?
+                - What is the core problem the author addresses?
+                - What are points of nuance the author highlights?
+                - What are open questions the author points out?
                 Follow the output format under any circumstances.                  
 
                 OUTPUT FORMAT: \n\n
-                Summary: \n\n
-                1: xxx\n 
-                2: xxx\n 
+                Summary: \n
+                1: xxx.\n 
+                2: xxx.\n 
                 ...\n  
-                N: xxx\n\n     
+                N: xxx.\n\n     
 
-                Be sure to use statements as concise and academic as possible, do not have too much repetitive information.                 
+                Be sure to use statements as concise and precise as possible. 
+                Review the answer to make sure it fits the format.                 
 
                 INPUT TEXT: \n\n
                 {chunk}
@@ -147,7 +175,7 @@ class Summarizer:
 
     def _set_loop_threshold_and_timeout(self, len_text: int) -> Tuple[float, int]:
         timeout = time.time() + 60 * self.DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS * len_text / 100000
-        loop_threshold = int(self.DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS * len_text / 100000)
+        loop_threshold = max(int(self.DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS * len_text / 100000), 1)
         return timeout, loop_threshold
 
     @staticmethod
