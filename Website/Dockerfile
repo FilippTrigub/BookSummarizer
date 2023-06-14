@@ -1,8 +1,24 @@
-# Use the Nginx image from Docker Hub
-FROM nginx:alpine
+# Use the official image as a parent image
+FROM node:lts-alpine as build-stage
 
-# Copy the HTML file to the nginx container
-COPY index.html /usr/share/nginx/html/index.html
+# Set the working directory
+WORKDIR /app
 
-# Expose port 80
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy the rest of your app's source code
+COPY . .
+
+# Build the app
+RUN npm run build
+
+# production stage
+FROM nginx:stable-alpine as production-stage
+COPY --from=build-stage /app/dist /usr/share/nginx/html
+
 EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
