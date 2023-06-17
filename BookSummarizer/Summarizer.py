@@ -3,7 +3,7 @@ import os
 import re
 import time
 from datetime import datetime
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import tiktoken
 import openai
@@ -26,13 +26,13 @@ class Summarizer:
         self.book_title = None
         self.TOKEN_THRESHOLD = float(os.getenv('CASH_THRESHOLD')) * 1000 / 0.02
 
-    def summarize_book(self, filename: str, delimiter: str, book_title: str):
+    def summarize_book(self, filename: str, delimiters: List[str], book_title: str):
         self.book_title = book_title
 
         text = self._get_text(filename)
 
         print("Summarizing parts")
-        summaries_of_parts = self.summarize_parts(text, delimiter)
+        summaries_of_parts = self.summarize_parts(text, delimiters)
 
         print("Summarizing book")
         summary_of_book = self.summarize_summaries_of_parts(copy.deepcopy(summaries_of_parts), len(text))
@@ -57,8 +57,8 @@ class Summarizer:
             summary_of_part = summary_of_part + self._summarize_chunk(chunk, summarize_summaries) + '\n'
         return summary_of_part
 
-    def summarize_parts(self, text: str, delimiter: str) -> List[str]:
-        parts = self._split_in_parts(text, delimiter)
+    def summarize_parts(self, text: str, delimiters: List[str]) -> List[str]:
+        parts = self._split_in_parts(text, delimiters)
         parts = self._clean_parts(parts)
         return self._summarize_parts(parts)
 
@@ -185,8 +185,35 @@ class Summarizer:
         return text
 
     @staticmethod
-    def _split_in_parts(text: str, delimiter: str) -> List[str]:
-        return [part for part in re.split(delimiter, text) if part]
+    def _split_in_parts(text: str, delimiters: List[str]) -> List[str]:
+        if not isinstance(text, str):
+            raise ValueError("Text must be a string.")
+        if not isinstance(delimiters, list):
+            raise ValueError("Delimiters must be a list.")
+        for delimiter in delimiters:
+            if not isinstance(delimiter, str):
+                raise ValueError("All delimiters must be strings.")
+            if delimiter not in text:
+                raise ValueError(f"Delimiter '{delimiter}' not found in text.")
+            if text.count(delimiter) > 1:
+                raise ValueError(f"Delimiter {delimiter} is not unique.")
+
+        if len(delimiters) == 1:
+            return [part for part in re.split(delimiters[0], text) if part]
+        else:
+            parts = []
+            unsegmented_text = text
+            for delimiter in delimiters:
+                split_text = unsegmented_text.split(delimiter)
+                # add the first part. As unsegmented text gets updated every loop, this should be the desired cutout
+                parts.append(split_text[0])
+                # set the rest of the text as unsegmented text for the next loop
+                unsegmented_text = split_text[1]
+
+            # add final part
+            parts.append(unsegmented_text)
+
+            return parts
 
     @staticmethod
     def _clean_parts(parts: List[str]) -> List[str]:
@@ -242,11 +269,10 @@ if __name__ == '__main__':
 
     openai.api_key = os.getenv('OPENAI_API_KEY')
     book_file_name = 'Getting_To_Yes_Negotiating_Agreement_Without_Giving_In_Roger_Fisher_and_William_Ury.txt'
-    # book_file_name = 'test.txt'
 
     summary_of_book, summaries_of_parts, tokens_used, text_length = Summarizer().summarize_book(
         os.path.join('transcriptions', book_file_name),
-        'Part \d+\. ',
+        ['Part \d+\. '],
         'Test')
 
     save_list_to_file(
