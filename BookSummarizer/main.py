@@ -6,6 +6,7 @@ import openai
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 from BookSummarizer.Summarizer import Summarizer
 from BookSummarizer.Transcriber import Transcriber, save_list_to_file, save_dict_to_file
@@ -15,7 +16,7 @@ APP_URI = '0.0.0.0'
 APP_PORT = 5555
 
 
-class UserInput:
+class UserInput(BaseModel):
     name: str
     email: str
     file_path: str
