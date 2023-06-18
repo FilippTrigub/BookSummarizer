@@ -1,38 +1,30 @@
 <template>
-    <div id="App" class="container py-5">
-        <div class="top-bar">
-            <img src="logo.png" alt="Logo" class="logo" />
-        </div>
-        <div class="center-aligned">
-            <div class="mb-3">
-                <label class="form-label h2">{{ header }}</label>
-            </div>
-            <div class="mb-3">
-                <label class="form-label h3">{{ description_header }}</label>
-            </div>
-            <div class="mb-3 file-upload">
-                <label class="form-label h3">Upload a file</label>
-                <input type="file" accept=".mp3,.wav" @change="handleFileUpload" class="form-control" />
-            </div>
-            <div>
-                <h3 class="mb-3">Enter the first words of each part:</h3>
-                <div v-for="(chapter, index) in chapters" :key="index" class="mb-3">
-                    <label class="form-label">Part {{ index + 1 }}:</label>
-                    <input type="text" v-model="chapters[index]" class="form-control" />
-                </div>
-                <button @click="addChapter" class="btn btn-primary mb-3">+</button>
-            </div>
-            <div class="mb-3">
-                <label class="form-label h3">Email</label>
-                <input type="email" v-model="email" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label h3">Name</label>
-                <input type="text" v-model="name" class="form-control" />
-            </div>
-            <button id="summarize-button" @click="summarize" class="btn btn-success btn-lg">Summarize!</button>
-        </div>
-    </div>
+    <v-app id="App">
+        <v-app-bar app color="indigo" dark>
+            <v-img src="logo.png" alt="Logo" class="logo" />
+        </v-app-bar>
+        <v-container class="py-5">
+            <v-row justify="center">
+                <v-col cols="12" md="8">
+                    <v-subheader class="mb-3">{{ header }}</v-subheader>
+                    <v-subheader class="mb-3">{{ description_header }}</v-subheader>
+                    <v-file-input class="mb-3" accept=".mp3,.wav" @change="handleFileUpload" label="Upload a file"></v-file-input>
+                    <v-subheader class="mb-3">Enter the first words of each part:</v-subheader>
+                    <v-text-field
+                        v-for="(chapter, index) in chapters"
+                        :key="index"
+                        class="mb-3"
+                        label="Part"
+                        v-model="chapters[index]"
+                    ></v-text-field>
+                    <v-btn @click="addChapter" class="mb-3" color="primary">+</v-btn>
+                    <v-text-field class="mb-3" label="Email" v-model="email"></v-text-field>
+                    <v-text-field class="mb-3" label="Name" v-model="name"></v-text-field>
+                    <v-btn @click="summarize" class="btn btn-success btn-lg" color="green">Summarize!</v-btn>
+                </v-col>
+            </v-row>
+        </v-container>
+    </v-app>
 </template>
 
 <script>
@@ -89,50 +81,9 @@
         },
     };
 </script>
-  
-<style>
-    #summarize-button {
-        background-color: green;
-        color: white;
-        padding: 15px 30px;
-        font-size: 20px;
-        border-radius: 5px;
-        cursor: pointer}
 
-    .top-bar {
-        width: 100%;
-        background-color: #f4f4f4;
-        padding: 10px 0;
-        position: sticky;
-        top: 0;
-        z-index: 9999;
-    }
-
-    .logo {
-        width: 100px;
-        height: auto;
-        margin-left: 20px;
-    }
-
-    .center-aligned {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        max-width: 1000px; /* Adjust to your preferred width */
-        margin: auto;
-    }
-
-    .center-aligned .form-control {
-        width: 100%;
-    }
-
-    .file-upload {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .mb-3 {
-        margin-bottom: 30px; /* Adjust to your preferred spacing */
+<style scoped>
+    .v-subheader {
+        margin-bottom: 15px;
     }
 </style>

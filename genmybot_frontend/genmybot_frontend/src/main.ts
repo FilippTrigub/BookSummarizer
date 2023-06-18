@@ -1,14 +1,11 @@
-import './assets/main.css'
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap/dist/js/bootstrap.js'
-
-
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
+import vuetify from './plugins/vuetify'  // assuming you've set up vuetify
 
 const app = createApp(App)
 
-app.use(router)
-
-app.mount('#app')
+createApp(App)
+  .use(router)
+  .use(vuetify)
+  .mount('#app')

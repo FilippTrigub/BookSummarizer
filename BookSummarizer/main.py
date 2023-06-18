@@ -31,6 +31,7 @@ async def transcribe_and_summarize(user_input: UserInput):
 
     timestamp = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
 
+    # set paths
     transcription_path = os.path.join('transcriptions', timestamp + user_input.book_title)
     book_summary_path = os.path.join(
         'book_summaries',
@@ -38,12 +39,15 @@ async def transcribe_and_summarize(user_input: UserInput):
     chapter_summary_path = os.path.join(
         'chapter_summaries',
         timestamp + user_input.book_title)
+    costs_path = os.path.join('openai_costs', timestamp + user_input.book_title[:-4] + '.json')
 
+    # transcribe file
     transcriber = Transcriber()
 
     transcriptions = transcriber.transcribe(user_input.file_path)
     save_list_to_file(transcription_path, transcriptions)
 
+    # summarize
     summary_of_book, summaries_of_parts, tokens_used, text_length = Summarizer().summarize_book(
         transcription_path,
         user_input.delimiters,
@@ -61,7 +65,7 @@ async def transcribe_and_summarize(user_input: UserInput):
           f"This is {tokens_used * 0.02 / 1000 / text_length * 1000} $ per 1000 characters.")
 
     save_dict_to_file(
-        os.path.join('openai_costs', timestamp + user_input.book_title[:-4] + '.json'),
+        costs_path,
         {'book_title': user_input.book_title[:-4],
          'text_length': text_length,
          'tokens_used': tokens_used,
