@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from BookSummarizer.Summarizer import Summarizer
-from BookSummarizer.Transcriber import Transcriber, save_list_to_file, save_dict_to_file
+from APP.Summarizer import Summarizer
+from APP.Transcriber import Transcriber, save_list_to_file, save_dict_to_file
 
 app = FastAPI()
 APP_URI = '0.0.0.0'

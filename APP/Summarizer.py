@@ -9,7 +9,7 @@ import tiktoken
 import openai
 from dotenv import load_dotenv
 
-from BookSummarizer.Transcriber import save_list_to_file, save_dict_to_file
+from APP.Transcriber import save_list_to_file, save_dict_to_file
 
 
 class Summarizer:
