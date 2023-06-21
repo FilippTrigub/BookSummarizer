@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from APP.Summarizer import Summarizer
-from APP.Transcriber import Transcriber, save_list_to_file, save_dict_to_file
+from app.Summarizer import Summarizer
+from app.Transcriber import Transcriber, save_list_to_file, save_dict_to_file
 
 app = FastAPI()
 APP_URI = '0.0.0.0'
@@ -17,11 +17,12 @@ APP_PORT = 5555
 
 
 class UserInput(BaseModel):
+    title: str
+    description: str
     name: str
     email: str
-    file_path: str
     delimiters: List[str]
-    book_title: str
+    file_path: str
 
 
 @app.post("/transcribe_and_summarize")
@@ -32,14 +33,14 @@ async def transcribe_and_summarize(user_input: UserInput):
     timestamp = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
 
     # set paths
-    transcription_path = os.path.join('transcriptions', timestamp + user_input.book_title)
+    transcription_path = os.path.join('transcriptions', timestamp + user_input.title)
     book_summary_path = os.path.join(
         'book_summaries',
-        timestamp + user_input.book_title)
+        timestamp + user_input.title)
     chapter_summary_path = os.path.join(
         'chapter_summaries',
-        timestamp + user_input.book_title)
-    costs_path = os.path.join('openai_costs', timestamp + user_input.book_title[:-4] + '.json')
+        timestamp + user_input.title)
+    costs_path = os.path.join('openai_costs', timestamp + user_input.title[:-4] + '.json')
 
     # transcribe file
     transcriber = Transcriber()
@@ -51,7 +52,7 @@ async def transcribe_and_summarize(user_input: UserInput):
     summary_of_book, summaries_of_parts, tokens_used, text_length = Summarizer().summarize_book(
         transcription_path,
         user_input.delimiters,
-        user_input.book_title)
+        user_input.title)
 
     save_list_to_file(
         book_summary_path,
@@ -66,7 +67,7 @@ async def transcribe_and_summarize(user_input: UserInput):
 
     save_dict_to_file(
         costs_path,
-        {'book_title': user_input.book_title[:-4],
+        {'book_title': user_input.title[:-4],
          'text_length': text_length,
          'tokens_used': tokens_used,
          'costs': tokens_used * 0.02 / 1000,

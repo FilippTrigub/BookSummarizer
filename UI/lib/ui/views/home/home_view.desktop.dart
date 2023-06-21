@@ -36,6 +36,21 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
                     const SizedBox(
                       height: 50,
                     ),
+                    ElevatedButton(
+                      onPressed: () { 
+                        viewModel.pickAudioFile(context);
+                      },
+                      child: const Text('Upload File'),
+                    ),
+                    const SizedBox(
+                      height: 25,
+                    ),
+                    Text(
+                      'File: ${viewModel.pickedFileName ?? "No file selected"}'
+                    ),
+                    const SizedBox(
+                      height: 50,
+                    ),
                     const Text('Provide the title of the recording:'),
                     TextField(
                       controller: viewModel.titleController,
@@ -74,16 +89,19 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
                     const SizedBox(
                       height: 25,
                     ),
-                    MaterialButton(
-                      onPressed: viewModel.runSummarization,
-                      color: kcDarkGreyColor,
-                      child: const Text(
-                        'Summarize!',
-                        style: TextStyle(
-                          color: Colors.white
+                    IgnorePointer(
+                      ignoring: viewModel.isContextSet == false,
+                      child: MaterialButton(
+                        onPressed: viewModel.runSummarization,
+                        color: kcDarkGreyColor,
+                        child: const Text(
+                          'Summarize!',
+                          style: TextStyle(
+                            color: Colors.white
+                          ),
                         ),
                       ),
-                    )
+)
                   ],
                 ),
                 Row(
