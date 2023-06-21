@@ -213,7 +213,7 @@ class Summarizer:
             # add final part
             parts.append(unsegmented_text)
 
-            return parts
+            return [part.strip() for part in parts if part]
 
     @staticmethod
     def _clean_parts(parts: List[str]) -> List[str]:
@@ -269,10 +269,14 @@ if __name__ == '__main__':
 
     openai.api_key = os.getenv('OPENAI_API_KEY')
     book_file_name = 'Getting_To_Yes_Negotiating_Agreement_Without_Giving_In_Roger_Fisher_and_William_Ury.txt'
+    delimiters = ['Part \d+\. ']
+
+    # book_file_name = 'test.txt'
+    # delimiters = ['Part 1.', 'test 2.', 'Past 3.']
 
     summary_of_book, summaries_of_parts, tokens_used, text_length = Summarizer().summarize_book(
         os.path.join('transcriptions', book_file_name),
-        ['Part \d+\. '],
+        delimiters,
         'Test')
 
     save_list_to_file(
