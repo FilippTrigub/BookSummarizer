@@ -1,10 +1,10 @@
 FROM python:3.10.12-slim
 
-WORKDIR ./
+WORKDIR /app
 
 ADD . /app
 
-RUN pip install --no-cache-dir -r app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 5555
 

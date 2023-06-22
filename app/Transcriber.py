@@ -19,8 +19,11 @@ class Transcriber:
         self.model_source = self._get_model_source()
         self.model = self._get_model()
 
-    def transcribe(self, audio_paths):
-        transcriptions = self.model.transcribe(audio_paths)
+    def transcribe(self, audio_paths, fp16 = False):
+        if self.model_source == 'whisper':
+            transcriptions = self.model.transcribe(audio_paths, fp16=fp16)
+        else:
+            transcriptions = self.model.transcribe(audio_paths)
         return self.get_texts(transcriptions)
 
     def _get_model_source(self):

@@ -67,7 +67,7 @@ class HomeViewMobile extends ViewModelWidget<HomeViewModel> {
                       height: 5,
                     ),
                     DynamicForm(
-                      key: dynamicFormKey
+                      onControllersChanged: (controllers) => viewModel.updateControllers(controllers),
                       ),
                     const SizedBox(
                       height: 25,
@@ -86,13 +86,16 @@ class HomeViewMobile extends ViewModelWidget<HomeViewModel> {
                     const SizedBox(
                       height: 25,
                     ),
-                    MaterialButton(
-                      onPressed: viewModel.runSummarization,
-                      color: kcDarkGreyColor,
-                      child: const Text(
-                        'Summarize!',
-                        style: TextStyle(
-                          color: Colors.white
+                    IgnorePointer(
+                      ignoring: viewModel.isContextSet == false,
+                      child: MaterialButton(
+                        onPressed: () => viewModel.runSummarization(dynamicFormKey.currentContext),
+                        color: kcDarkGreyColor,
+                        child: const Text(
+                          'Summarize!',
+                          style: TextStyle(
+                            color: Colors.white
+                          ),
                         ),
                       ),
                     )

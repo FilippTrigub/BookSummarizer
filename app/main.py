@@ -1,19 +1,34 @@
 import os
+import shutil
 from datetime import datetime
 from typing import List
 
 import openai
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from app.Summarizer import Summarizer
-from app.Transcriber import Transcriber, save_list_to_file, save_dict_to_file
+from Summarizer import Summarizer
+from Transcriber import Transcriber, save_list_to_file, save_dict_to_file
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 APP_URI = '0.0.0.0'
 APP_PORT = 5555
+
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    with open(file.filename, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
 
 
 class UserInput(BaseModel):
@@ -22,7 +37,7 @@ class UserInput(BaseModel):
     name: str
     email: str
     delimiters: List[str]
-    file_path: str
+    file_name: str
 
 
 @app.post("/transcribe_and_summarize")
@@ -45,7 +60,7 @@ async def transcribe_and_summarize(user_input: UserInput):
     # transcribe file
     transcriber = Transcriber()
 
-    transcriptions = transcriber.transcribe(user_input.file_path)
+    transcriptions = transcriber.transcribe(user_input.file_name, fp16=False)
     save_list_to_file(transcription_path, transcriptions)
 
     # summarize

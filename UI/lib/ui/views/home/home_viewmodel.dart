@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:test_stacked_web_app/app/app.bottomsheets.dart';
 import 'package:test_stacked_web_app/app/app.dialogs.dart';
@@ -10,12 +12,11 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:test_stacked_web_app/ui/widgets/dynamic_form.dart';
 import 'package:file_picker/file_picker.dart';
-import 'dart:io';
-
 
 class HomeViewModel extends BaseViewModel {
   BuildContext? _context;
   bool get isContextSet => _context != null;
+  List<String> partDelimiters = [];
 
   final dynamicFormKey = GlobalKey<DynamicFormState>();
 
@@ -23,8 +24,6 @@ class HomeViewModel extends BaseViewModel {
   final descriptionController = TextEditingController();
   final emailController = TextEditingController();
   final nameController = TextEditingController();
-
-  // No need for dispose() as BaseViewModel does not have it
 
   final _dialogService = locator<DialogService>();
   final _bottomSheetService = locator<BottomSheetService>();
@@ -54,20 +53,25 @@ class HomeViewModel extends BaseViewModel {
     );
   }
 
-  void runSummarization() async {
-    var partDelimiters = dynamicFormKey.currentState?.getPartDelimiters();
+  void updateControllers(List<TextEditingController> controllers) {
+    partDelimiters = controllers.map((controller) => controller.text).toList();
+  }
 
-    var request = http.Request('POST', Uri.parse(backendEndpoint));
-    request.body = json.encode({
-      'title': titleController.text,
-      'description': descriptionController.text,
-      'email': emailController.text,
-      'name': nameController.text,
-      'delimiters': partDelimiters,
-      'file_path': pickedFilePath
-    });
-
-    var response = await request.send();
+  Future<void> runSummarization(BuildContext? context) async {
+    var response = await http.post(
+      Uri.parse(backendEndpoint+'/transcribe_and_summarize'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: json.encode({
+        'title': titleController.text,
+        'description': descriptionController.text,
+        'name': nameController.text,
+        'email': emailController.text,
+        'delimiters': partDelimiters,
+        'file_name': pickedFileName,
+      }),
+    );
 
     if (response.statusCode == 200) {
       print('Summarization successful');
@@ -80,14 +84,15 @@ class HomeViewModel extends BaseViewModel {
     }
   }
 
+
   void resetAllFields() {
   titleController.clear();
   descriptionController.clear();
   emailController.clear();
   nameController.clear();
-  pickedFilePath = null;
+  pickedFileBytes = null;
   pickedFileName = null;
-  notifyListeners();  // Notify listeners to rebuild UI
+  notifyListeners();
   }
 
   void showCheckmarkOverlay(BuildContext context) {
@@ -122,7 +127,7 @@ class HomeViewModel extends BaseViewModel {
 
 
   FilePickerResult? filePickerResult;
-  File? pickedFilePath;
+  Uint8List? pickedFileBytes;
   String? pickedFileName;
   bool _isLoading = false;
 
@@ -139,10 +144,10 @@ class HomeViewModel extends BaseViewModel {
       );
 
       if (filePickerResult != null) {
-        pickedFilePath = File(filePickerResult!.files.single.bytes.toString());
+        pickedFileBytes = filePickerResult!.files.single.bytes;
         pickedFileName = filePickerResult!.files.single.name;
-        notifyListeners();
-        print('$pickedFileName');
+        uploadFile(pickedFileBytes!, pickedFileName!);
+        notifyListeners();        
       }
       
       _isLoading = false;
@@ -151,6 +156,18 @@ class HomeViewModel extends BaseViewModel {
     } 
     catch(e) {
         print(e);
+    }
+  }
+
+  uploadFile(Uint8List fileBytes, String fileName) async {
+    var uri = Uri.parse(backendEndpoint+'/upload');
+    var request = http.MultipartRequest('POST', uri)
+      ..files.add(http.MultipartFile.fromBytes('file', fileBytes, filename: fileName));
+    var response = await request.send();
+    if (response.statusCode == 200) {
+      print("File upload successful");
+    } else {
+      print("File upload failed");
     }
   }
 }

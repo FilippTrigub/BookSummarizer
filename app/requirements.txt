@@ -50,7 +50,7 @@ multiprocess==0.70.14
 networkx==3.1
 numba==0.57.0
 numpy==1.24.3
-openai==0.27.7
+openai==0.27.8
 openai-whisper==20230314
 packaging==23.1
 pandas==2.0.1
@@ -69,6 +69,7 @@ pyproject_hooks==1.0.0
 pyrsistent==0.19.3
 python-dateutil==2.8.2
 python-dotenv==1.0.0
+python-multipart==0.0.6
 pytz==2023.3
 pywin32-ctypes==0.2.0
 PyYAML==6.0

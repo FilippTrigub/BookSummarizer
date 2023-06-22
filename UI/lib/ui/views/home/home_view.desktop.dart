@@ -70,7 +70,7 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
                       height: 5,
                     ),
                     DynamicForm(
-                      key: dynamicFormKey
+                      onControllersChanged: (controllers) => viewModel.updateControllers(controllers),
                       ),
                     const SizedBox(
                       height: 25,
@@ -92,7 +92,10 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
                     IgnorePointer(
                       ignoring: viewModel.isContextSet == false,
                       child: MaterialButton(
-                        onPressed: viewModel.runSummarization,
+                        onPressed:() {
+                          viewModel.runSummarization(dynamicFormKey.currentContext);
+                        },
+                        // onPressed: () => viewModel.runSummarization(dynamicFormKey.currentContext),
                         color: kcDarkGreyColor,
                         child: const Text(
                           'Summarize!',
@@ -101,7 +104,7 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
                           ),
                         ),
                       ),
-)
+                    )
                   ],
                 ),
                 Row(
