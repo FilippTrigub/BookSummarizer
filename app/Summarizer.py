@@ -186,34 +186,49 @@ class Summarizer:
 
     @staticmethod
     def _split_in_parts(text: str, delimiters: List[str]) -> List[str]:
-        if not isinstance(text, str):
+        def _split_text_disregarding_case(lowercase_delimiter: str, lowercase_text: str, text: str):
+            delimiter_index = lowercase_text.index(lowercase_delimiter)
+            first_part = text[:delimiter_index].strip()
+            second_part = text[delimiter_index + len(lowercase_delimiter):]
+            if second_part[0] == '.':
+                second_part = second_part[1:].strip()
+            return first_part, second_part
+
+        lowercase_text = text.lower()
+        lowercase_delimiters = [delimiter.lower() for delimiter in delimiters]
+        if not isinstance(lowercase_text, str):
             raise ValueError("Text must be a string.")
-        if not isinstance(delimiters, list):
+        if not isinstance(lowercase_delimiters, list):
             raise ValueError("Delimiters must be a list.")
-        for delimiter in delimiters:
-            if not isinstance(delimiter, str):
+        for lowercase_delimiter in lowercase_delimiters:
+            if not isinstance(lowercase_delimiter, str):
                 raise ValueError("All delimiters must be strings.")
-            if delimiter not in text:
-                raise ValueError(f"Delimiter '{delimiter}' not found in text.")
-            if text.count(delimiter) > 1:
-                raise ValueError(f"Delimiter {delimiter} is not unique.")
+            if lowercase_delimiter not in lowercase_text:
+                raise ValueError(f"Delimiter '{lowercase_delimiter}' not found in text.")
+            if text.count(lowercase_delimiter) > 1:
+                raise ValueError(f"Delimiter {lowercase_delimiter} is not unique.")
 
         if len(delimiters) == 1:
-            return [part for part in re.split(delimiters[0], text) if part]
+            return [part for part in
+                    _split_text_disregarding_case(lowercase_delimiters[0], lowercase_text, text) if part]
         else:
             parts = []
             unsegmented_text = text
-            for delimiter in delimiters:
-                split_text = unsegmented_text.split(delimiter)
+            lowercase_unsegmented_text = unsegmented_text.lower()
+            for lowercase_delimiter in lowercase_delimiters:
+                split_text = _split_text_disregarding_case(
+                    lowercase_delimiter, lowercase_unsegmented_text, unsegmented_text)
                 # add the first part. As unsegmented text gets updated every loop, this should be the desired cutout
                 parts.append(split_text[0])
                 # set the rest of the text as unsegmented text for the next loop
                 unsegmented_text = split_text[1]
+                lowercase_unsegmented_text = unsegmented_text.lower()
 
             # add final part
             parts.append(unsegmented_text)
 
             return [part.strip() for part in parts if part]
+
 
     @staticmethod
     def _clean_parts(parts: List[str]) -> List[str]:

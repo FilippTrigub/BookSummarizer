@@ -45,7 +45,7 @@ async def transcribe_and_summarize(user_input: UserInput):
     load_dotenv()
     openai.api_key = os.getenv('OPENAI_API_KEY')
 
-    timestamp = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+    timestamp = datetime.now().strftime('%Y_%m_%d_%H_%M_%S') + '_'
 
     # set paths
     transcription_path = os.path.join('transcriptions', timestamp + user_input.title)
