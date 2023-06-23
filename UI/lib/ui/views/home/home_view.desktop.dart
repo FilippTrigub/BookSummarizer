@@ -95,7 +95,6 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
                         onPressed:() {
                           viewModel.runSummarization(dynamicFormKey.currentContext);
                         },
-                        // onPressed: () => viewModel.runSummarization(dynamicFormKey.currentContext),
                         color: kcDarkGreyColor,
                         child: const Text(
                           'Summarize!',

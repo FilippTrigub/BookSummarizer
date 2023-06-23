@@ -32,6 +32,13 @@ class HomeViewModel extends BaseViewModel {
 
   int _counter = 0;
 
+  FilePickerResult? filePickerResult;
+  Uint8List? pickedFileBytes;
+  String? pickedFileName;
+  bool _isLoading = false;
+
+  bool get isLoading => _isLoading;
+
   void incrementCounter() {
     _counter++;
     rebuildUi();
@@ -59,7 +66,7 @@ class HomeViewModel extends BaseViewModel {
 
   Future<void> runSummarization(BuildContext? context) async {
     var response = await http.post(
-      Uri.parse(backendEndpoint+'/transcribe_and_summarize'),
+      Uri.parse(backendEndpoint+'/run_summarization'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -86,13 +93,13 @@ class HomeViewModel extends BaseViewModel {
 
 
   void resetAllFields() {
-  titleController.clear();
-  descriptionController.clear();
-  emailController.clear();
-  nameController.clear();
-  pickedFileBytes = null;
-  pickedFileName = null;
-  notifyListeners();
+    titleController.clear();
+    descriptionController.clear();
+    emailController.clear();
+    nameController.clear();
+    pickedFileBytes = null;
+    pickedFileName = null;
+    notifyListeners();
   }
 
   void showCheckmarkOverlay(BuildContext context) {
@@ -119,19 +126,11 @@ class HomeViewModel extends BaseViewModel {
 
   Overlay.of(context)!.insert(overlayEntry);
 
-  // Remove the overlay after 3 seconds
-  Future.delayed(const Duration(seconds: 3), () {
+  Future.delayed(const Duration(seconds: 15), () {
     overlayEntry.remove();
     });
   }
 
-
-  FilePickerResult? filePickerResult;
-  Uint8List? pickedFileBytes;
-  String? pickedFileName;
-  bool _isLoading = false;
-
-  bool get isLoading => _isLoading;
 
   pickAudioFile(context) async {
       try {

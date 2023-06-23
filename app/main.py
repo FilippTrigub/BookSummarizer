@@ -1,5 +1,6 @@
 import os
 import shutil
+import threading
 from datetime import datetime
 from typing import List
 
@@ -30,6 +31,8 @@ APP_PORT = 5555
 async def upload_file(file: UploadFile = File(...)):
     with open(file.filename, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
+        print('File uploaded.')
+    return {"status": 200}
 
 
 class UserInput(BaseModel):
@@ -41,8 +44,19 @@ class UserInput(BaseModel):
     file_name: str
 
 
+@app.post("/run_summarization")
+async def run_summarization(user_input: UserInput):
+    # Start a new thread that runs the summarization process
+    print('Run summarization in separate thread.')
+    threading.Thread(target=transcribe_and_summarize, args=(user_input,)).start()
+
+    # Immediately return a status of 200
+    print('Return success status.')
+    return {"status": 200}
+
+
 @app.post("/transcribe_and_summarize")
-async def transcribe_and_summarize(user_input: UserInput):
+def transcribe_and_summarize(user_input: UserInput):
     load_dotenv()
     openai.api_key = os.getenv('OPENAI_API_KEY')
 
@@ -59,17 +73,20 @@ async def transcribe_and_summarize(user_input: UserInput):
     costs_path = os.path.join('openai_costs', timestamp + user_input.title[:-4] + '.json')
 
     # transcribe file
+    print('Transcribe audio file.')
     transcriber = Transcriber()
 
     transcriptions = transcriber.transcribe(user_input.file_name, fp16=False)
     save_list_to_file(transcription_path, transcriptions)
 
     # summarize
+    print('Summarize transcribed text.')
     summary_of_book, summaries_of_parts, tokens_used, text_length = Summarizer().summarize_book(
         transcription_path,
         user_input.delimiters,
         user_input.title)
 
+    print('Save results.')
     save_list_to_file(
         book_summary_path,
         [summary_of_book])
@@ -102,3 +119,12 @@ if __name__ == "__main__":
             os.mkdir(dir_name)
 
     uvicorn.run(app, host=APP_URI, port=APP_PORT)
+
+    # user_input = UserInput
+    # user_input.title = 'test'
+    # user_input.email = 'filipp.trigub@gmail.com'
+    # user_input.file_name = 'test.mp3'
+    # user_input.delimiters = ['test']
+    # user_input.description = ' test'
+    # user_input.name = 'test'
+    # transcribe_and_summarize(user_input)
