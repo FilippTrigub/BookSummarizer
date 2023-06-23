@@ -44,4 +44,6 @@
 
 
 .env
+.idea/
+
 /audiobooks/
