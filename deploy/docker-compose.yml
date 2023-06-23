@@ -1,0 +1,26 @@
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - "5555:5555"
+    networks:
+      - network1
+
+  ui:
+    build:
+      context: ./UI
+      dockerfile: Dockerfile
+    volumes:
+      - ./UI:/app
+    ports:
+      - "80:80"
+    networks:
+      - network1
+
+networks:
+  network1:
+    driver: bridge

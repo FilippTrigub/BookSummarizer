@@ -1,5 +1,5 @@
 name: test_stacked_web_app
-description: An app build with the stacked framework
+description: An api build with the stacked framework
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
