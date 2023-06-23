@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 from Summarizer import Summarizer
 from Transcriber import Transcriber, save_list_to_file, save_dict_to_file
+from send_mail import send_mail
 
 app = FastAPI()
 app.add_middleware(
@@ -88,9 +89,11 @@ async def transcribe_and_summarize(user_input: UserInput):
          'costs': tokens_used * 0.02 / 1000,
          'costs_per_1000_characters': tokens_used * 0.02 / 1000 / text_length * 1000}
     )
-    return {'transcription_path': transcription_path,
-            'chapter_summary_path': chapter_summary_path,
-            'book_summary_path': chapter_summary_path}
+
+    send_mail(recipient_email=user_input.email,
+              subject='Your Summary is here!',
+              attachment_paths=[book_summary_path, chapter_summary_path],
+              book_title=user_input.title)
 
 
 if __name__ == "__main__":

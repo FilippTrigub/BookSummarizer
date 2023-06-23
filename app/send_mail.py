@@ -6,7 +6,7 @@ from email.mime.text import MIMEText
 from email import encoders
 
 
-def send_mail(recipient, subject, file_path, book_name):
+def send_mail(recipient_email, subject, attachment_paths, book_title):
     # Set up the SMTP server
     smtp_server = 'smtp.office365.com'
     port = 587  # For starttls
@@ -16,22 +16,23 @@ def send_mail(recipient, subject, file_path, book_name):
     # Create a multipart message
     msg = MIMEMultipart()
     msg['From'] = sender_email
-    msg['To'] = recipient
+    msg['To'] = recipient_email
     msg['Subject'] = subject
 
     # Add your message body
-    msg.attach(MIMEText("body", 'plain'))
+    msg.attach(MIMEText("foo", 'plain'))
 
     # Open the file in binary mode
-    with open(file_path, "rb") as attachment:
-        part = MIMEBase("application", "octet-stream")
-        part.set_payload(attachment.read())
+    for path in attachment_paths:
+        with open(path, "rb") as attachment:
+            part = MIMEBase("application", "octet-stream")
+            part.set_payload(attachment.read())
 
     # Encode to base64
     encoders.encode_base64(part)
 
     # Add header
-    part.add_header("Content-Disposition", f"attachment; filename=Summary of {book_name}.txt")
+    part.add_header("Content-Disposition", f"attachment; filename=Summary of {book_title}.txt")
 
     # Add attachment to message
     msg.attach(part)
@@ -41,7 +42,7 @@ def send_mail(recipient, subject, file_path, book_name):
     server.starttls()
     server.login(sender_email, password)
     text = msg.as_string()
-    server.sendmail(sender_email, recipient, text)
+    server.sendmail(sender_email, recipient_email, text)
     server.quit()
     print("Mail sent!")
 
