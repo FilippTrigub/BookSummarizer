@@ -1,26 +1,22 @@
+version: '3.8'
+
 services:
   api:
+    container_name: BookSummarizer-api
+    image: generalregistry.azurecr.io/booksummarizer:api
     build:
-      context: ./api
+      context: ../api
       dockerfile: Dockerfile
-    volumes:
-      - .:/app
     ports:
       - "5555:5555"
-    networks:
-      - network1
+    restart: always
 
   ui:
+    container_name: BookSummarizer-ui
+    image: generalregistry.azurecr.io/booksummarizer:ui
     build:
-      context: ./UI
+      context: ../UI
       dockerfile: Dockerfile
-    volumes:
-      - ./UI:/app
     ports:
-      - "80:80"
-    networks:
-      - network1
-
-networks:
-  network1:
-    driver: bridge
+      - "8080:80"
+    restart: always
