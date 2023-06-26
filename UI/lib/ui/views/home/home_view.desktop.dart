@@ -13,6 +13,15 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
 
   @override
   Widget build(BuildContext context, HomeViewModel viewModel) {
+    String recordingTitleText = 'Provide the title of the recording:';
+    String recordingDescriptionText = 'Describe the content to help the AI:';
+    String emailText = 'Please provide your email address so that we can send you the summary:';
+    String nameText = 'Finally please allow us to address you with your name:';
+    String recordingTitleHint = 'Title';
+    String recordingDescriptionHint = 'Description';
+    String emailHint = 'Email';
+    String nameHint = 'Name';
+
     return Scaffold(
       body: Center(
         child: SizedBox(
@@ -51,16 +60,24 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
                     const SizedBox(
                       height: 50,
                     ),
-                    const Text('Provide the title of the recording:'),
+                    Text(recordingTitleText),
                     TextField(
                       controller: viewModel.titleController,
+                      decoration: InputDecoration(
+                        hintText: recordingTitleHint,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(
                       height: 25,
                     ),
-                    const Text('Describe the content to help the AI:'),
+                    Text(recordingDescriptionText),
                     TextField(
                       controller: viewModel.descriptionController,
+                      decoration: InputDecoration(
+                        hintText: recordingDescriptionHint,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(
                       height: 25,
@@ -71,20 +88,28 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
                     ),
                     DynamicForm(
                       onControllersChanged: (controllers) => viewModel.updateControllers(controllers),
-                      ),
+                    ),
                     const SizedBox(
                       height: 25,
                     ),
-                    const Text('Please provide your email address so that we can send you the summary:'),
+                    Text(emailText),
                     TextField(
                       controller: viewModel.emailController,
+                      decoration: InputDecoration(
+                        hintText: emailHint,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(
                       height: 25,
                     ),
-                    const Text('Finally please allow us to address you with your name:'),
+                    Text(nameText),
                     TextField(
                       controller: viewModel.nameController,
+                      decoration: InputDecoration(
+                        hintText: nameHint,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(
                       height: 25,

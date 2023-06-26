@@ -13,16 +13,24 @@ class DynamicForm extends StatefulWidget {
 class DynamicFormState extends State<DynamicForm> {
   final List<TextEditingController> _controllers = [];
 
-void addPartDelimiterField() {
-  var controller = TextEditingController();
-  controller.addListener(() {
-    widget.onControllersChanged(_controllers);
-  });
+  void addPartDelimiterField() {
+    var controller = TextEditingController();
+    controller.addListener(() {
+      widget.onControllersChanged(_controllers);
+    });
 
-  setState(() {
-    _controllers.add(controller);
-  });
-}
+    setState(() {
+      _controllers.add(controller);
+    });
+  }
+
+  void removePartDelimiterField() {
+    if (_controllers.isNotEmpty) {
+      setState(() {
+        _controllers.removeLast();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +39,24 @@ void addPartDelimiterField() {
       child: Form(
         child: Column(
           children: [
-            MaterialButton(
-              onPressed: addPartDelimiterField,
-              color: kcDarkGreyColor,
-              child: const Text('Add part'),
-              textColor: Colors.white,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                MaterialButton(
+                  onPressed: addPartDelimiterField,
+                  color: kcDarkGreyColor,
+                  child: const Text('Add part'),
+                  textColor: Colors.white,
+                ),
+                const SizedBox(width: 10),
+                MaterialButton(
+                  onPressed: _controllers.isNotEmpty ? removePartDelimiterField : null,
+                  color: kcDarkGreyColor,
+                  disabledColor: Colors.grey,
+                  child: const Text('Remove part'),
+                  textColor: Colors.white,
+                ),
+              ],
             ),
             const SizedBox(
               height: 5,
@@ -57,6 +78,7 @@ void addPartDelimiterField() {
     );
   }
 }
+
 
 
 class DynamicFormInheritedWidget extends InheritedWidget {

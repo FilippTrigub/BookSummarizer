@@ -3,7 +3,7 @@ version: '3.8'
 services:
   api:
     container_name: BookSummarizer-api
-    image: generalregistry.azurecr.io/booksummarizer:api
+    image: generalregistry.azurecr.io/booksummarizer_api
     build:
       context: ../api
       dockerfile: Dockerfile
@@ -13,7 +13,7 @@ services:
 
   ui:
     container_name: BookSummarizer-ui
-    image: generalregistry.azurecr.io/booksummarizer:ui
+    image: generalregistry.azurecr.io/booksummarizer_ui
     build:
       context: ../UI
       dockerfile: Dockerfile
