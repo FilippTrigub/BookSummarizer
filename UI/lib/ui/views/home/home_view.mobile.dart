@@ -23,11 +23,10 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
     String nameHint = 'Name';
 
     return Scaffold(
-      body: Center(
-        child: SizedBox(
-          width: kdDesktopMaxContentWidth,
-          height: kdDesktopMaxContentHeight,
-          child: SingleChildScrollView(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 25.0),
+          child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -46,7 +45,7 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
                       height: 50,
                     ),
                     ElevatedButton(
-                      onPressed: () {
+                      onPressed: () { 
                         viewModel.pickAudioFile(context);
                       },
                       child: const Text('Upload File'),
@@ -88,7 +87,7 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
                     ),
                     DynamicForm(
                       onControllersChanged: (controllers) => viewModel.updateControllers(controllers),
-                    ),
+                      ),
                     const SizedBox(
                       height: 25,
                     ),
