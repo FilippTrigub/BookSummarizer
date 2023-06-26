@@ -6,9 +6,8 @@ import 'package:stacked/stacked.dart';
 import 'home_viewmodel.dart';
 import 'package:test_stacked_web_app/ui/widgets/dynamic_form.dart';
 
-
-class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
-  HomeViewDesktop({super.key});
+class HomeViewMobile extends ViewModelWidget<HomeViewModel> {
+  HomeViewMobile({super.key});
   final dynamicFormKey = GlobalKey<DynamicFormState>();
 
   @override
