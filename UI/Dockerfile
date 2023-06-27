@@ -29,3 +29,5 @@ COPY --from=build-env /app/build/web /usr/share/nginx/html
 
 # Necessary for SSH to Azure
 EXPOSE 2222 80
+
+HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:80/ || exit 1
