@@ -24,7 +24,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 APP_URI = '0.0.0.0'
-APP_PORT = 5555
+APP_PORT = 443
 
 
 @app.get("/")
