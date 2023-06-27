@@ -27,6 +27,11 @@ APP_URI = '0.0.0.0'
 APP_PORT = 5555
 
 
+@app.post("/")
+async def home():
+    return {'hello': 'world'}
+
+
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     with open(file.filename, "wb") as buffer:

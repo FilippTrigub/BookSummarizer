@@ -2,7 +2,6 @@ version: '3.8'
 
 services:
   api:
-    container_name: BookSummarizer-api
     image: generalregistry.azurecr.io/booksummarizer_api
     build:
       context: ../api
@@ -12,11 +11,10 @@ services:
     restart: always
 
   ui:
-    container_name: BookSummarizer-ui
     image: generalregistry.azurecr.io/booksummarizer_ui
     build:
       context: ../UI
       dockerfile: Dockerfile
     ports:
-      - "8080:80"
+      - "80:80"
     restart: always

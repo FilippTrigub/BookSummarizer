@@ -68,6 +68,7 @@ class DynamicFormState extends State<DynamicForm> {
                   // Add your validation logic here
                   return null;
                 },
+                textAlign: TextAlign.center,
               ),
             const SizedBox(
               height: 5,
