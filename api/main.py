@@ -28,7 +28,7 @@ APP_PORT = 5555
 
 
 @app.post("/")
-async def home():
+async def root():
     return {'hello': 'world'}
 
 
