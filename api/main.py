@@ -27,7 +27,7 @@ APP_URI = '0.0.0.0'
 APP_PORT = 5555
 
 
-@app.post("/")
+@app.get("/")
 async def root():
     return {'hello': 'world'}
 

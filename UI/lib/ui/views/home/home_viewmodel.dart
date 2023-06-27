@@ -169,4 +169,13 @@ class HomeViewModel extends BaseViewModel {
       print("File upload failed");
     }
   }
+
+  Future<bool> checkBackendAvailability() async {
+    try {
+      final response = await http.get(Uri.parse(backendEndpoint));
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
 }
