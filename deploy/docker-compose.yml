@@ -6,8 +6,6 @@ services:
     build:
       context: ../api
       dockerfile: Dockerfile
-    ports:
-      - "443:443"
     restart: always
 
   ui:
@@ -15,6 +13,4 @@ services:
     build:
       context: ../UI
       dockerfile: Dockerfile
-    ports:
-      - "80:80"
     restart: always

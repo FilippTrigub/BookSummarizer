@@ -10,10 +10,6 @@ RUN apt-get -y upgrade
 RUN apt-get install -y ffmpeg --fix-missing
 
 # Necessary for SSH to Azure
-EXPOSE 2222 80
+EXPOSE 80
 
-EXPOSE 443
-
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "443"]
-
-HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:80/ || exit 1
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
