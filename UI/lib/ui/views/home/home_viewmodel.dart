@@ -14,6 +14,10 @@ import 'dart:convert';
 import 'package:test_stacked_web_app/ui/widgets/dynamic_form.dart';
 import 'package:file_picker/file_picker.dart';
 
+import 'package:logging/logging.dart';
+
+final Logger log = Logger('HomeViewModel');
+
 class HomeViewModel extends BaseViewModel {
   BuildContext? _context;
   bool get isContextSet => _context != null;
@@ -82,13 +86,13 @@ class HomeViewModel extends BaseViewModel {
     );
 
     if (response.statusCode == 200) {
-      print('Summarization successful');
+      log.warning('Summarization successful');
       resetAllFields();
       if (_context != null) {
         showCheckmarkOverlay(_context!);
       }
     } else {
-      print('Summarization failed with status: ${response.statusCode}.');
+      log.warning('Summarization failed with status: ${response.statusCode}.');
     }
   }
 
@@ -155,7 +159,7 @@ class HomeViewModel extends BaseViewModel {
       notifyListeners();
     } 
     catch(e) {
-        print(e);
+        log.warning(e);
     }
   }
 
@@ -165,9 +169,9 @@ class HomeViewModel extends BaseViewModel {
       ..files.add(http.MultipartFile.fromBytes('file', fileBytes, filename: fileName));
     var response = await request.send();
     if (response.statusCode == 200) {
-      print("File upload successful");
+      log.warning("File upload successful");
     } else {
-      print("File upload failed");
+      log.warning("File upload failed");
     }
   }
 
@@ -176,7 +180,7 @@ class HomeViewModel extends BaseViewModel {
       final response = await http.get(Uri.parse(backendEndpoint+'/check'));
       return response.statusCode == 200;
     } catch (e) {
-      print(e);
+      log.warning(e);
       return false;
     }
   }

@@ -10,7 +10,6 @@ import '../startup/startup_view.dart';
 import 'home_viewmodel.dart';
 import 'package:test_stacked_web_app/ui/widgets/dynamic_form.dart';
 
-
 class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
   HomeViewDesktop({super.key});
   final dynamicFormKey = GlobalKey<DynamicFormState>();
@@ -32,7 +31,6 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
         else {
           // If the future has completed with an error or the backend is not available, 
           // show the main widget with an overlay indicating that the backend is not available
-          print(backendEndpoint);
           return Stack(
             children: [
               buildMainWidget(context, viewModel),
