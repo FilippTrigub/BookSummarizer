@@ -1,6 +1,10 @@
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:test_stacked_web_app/ui/common/app_colors.dart';
 import 'package:test_stacked_web_app/ui/common/app_constants.dart';
 import 'package:test_stacked_web_app/ui/common/ui_helpers.dart';
+import '../../../app/app.router.dart';
+import '../startup/startup_view.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'home_viewmodel.dart';
@@ -18,7 +22,7 @@ class HomeViewMobile extends ViewModelWidget<HomeViewModel> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // If the future is still running (i.e., the backend availability check is still in progress), 
           // show a loading indicator
-          return Container();
+          return const StartupView();
         }
         else if (snapshot.hasData && snapshot.data == true) {
           // If the future has completed successfully and the backend is available, show the main widget

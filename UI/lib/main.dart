@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ResponsiveApp(
         builder: (_) => MaterialApp.router(
-              title: 'Stacked Application',
+              title: 'Audio Summarizer',
               theme: Theme.of(context).copyWith(
                 primaryColor: kcBackgroundColor,
                 focusColor: kcPrimaryColor,

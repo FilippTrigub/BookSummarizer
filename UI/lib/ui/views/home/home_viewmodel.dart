@@ -173,11 +173,7 @@ class HomeViewModel extends BaseViewModel {
 
   Future<bool> checkBackendAvailability() async {
     try {
-      print('Test Backend');
-      print(backendEndpoint);
       final response = await http.get(Uri.parse(backendEndpoint+'/check'));
-      print(response.statusCode);
-      log(response.statusCode as String);
       return response.statusCode == 200;
     } catch (e) {
       print(e);
