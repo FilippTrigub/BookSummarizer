@@ -24,12 +24,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 APP_URI = '0.0.0.0'
-APP_PORT = 8080
+APP_PORT = 8081
 
 
 @app.get("/")
 async def root():
     return {'hello': 'world'}
+
+
+@app.get("/check")
+async def check():
+    return {'status': 200}
 
 
 @app.post("/upload")

@@ -7,6 +7,10 @@ services:
       context: ../api
       dockerfile: Dockerfile
     restart: always
+    ports:
+      - 8081:8081
+    networks:
+      - book-summarizer-network
 
   ui:
     image: generalregistry.azurecr.io/booksummarizer_ui
@@ -14,3 +18,15 @@ services:
       context: ../UI
       dockerfile: Dockerfile
     restart: always
+    ports:
+      - 80:80
+    environment:
+      - API_URI=api
+    depends_on:
+      - api
+    networks:
+      - book-summarizer-network
+
+
+networks:
+  book-summarizer-network:

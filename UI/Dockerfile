@@ -20,7 +20,7 @@ RUN flutter config --enable-web
 RUN mkdir /app/
 COPY . /app/
 WORKDIR /app/
-RUN flutter build web
+RUN flutter build web --dart-define=API_URI=api
 
 
 # Stage 2 - Create the run-time image
@@ -28,4 +28,4 @@ FROM nginx:1.21.1-alpine
 COPY --from=build-env /app/build/web /usr/share/nginx/html
 
 # Necessary for SSH to Azure
-EXPOSE 2222 80
+EXPOSE 80
