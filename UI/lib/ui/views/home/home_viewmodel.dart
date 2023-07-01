@@ -22,6 +22,7 @@ class HomeViewModel extends BaseViewModel {
   BuildContext? _context;
   bool get isContextSet => _context != null;
   List<String> partDelimiters = [];
+  var logger = Logger('MyLogger');
 
   final dynamicFormKey = GlobalKey<DynamicFormState>();
 
@@ -177,10 +178,15 @@ class HomeViewModel extends BaseViewModel {
 
   Future<bool> checkBackendAvailability() async {
     try {
+      logger.warning('URI: ${backendEndpoint+'/check'}');
       final response = await http.get(Uri.parse(backendEndpoint+'/check'));
+      logger.warning('URI: ${backendEndpoint+'/check'}');
+      logger.warning('response: ${response.toString()}');
+      logger.warning('response.statusCode: ${response.statusCode.toString()}');
+      
       return response.statusCode == 200;
     } catch (e) {
-      log.warning(e);
+      log.warning('Exception: $e');
       return false;
     }
   }

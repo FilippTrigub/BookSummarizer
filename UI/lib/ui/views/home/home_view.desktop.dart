@@ -9,16 +9,23 @@ import '../../../app/app.router.dart';
 import '../startup/startup_view.dart';
 import 'home_viewmodel.dart';
 import 'package:test_stacked_web_app/ui/widgets/dynamic_form.dart';
+import 'package:logging/logging.dart';
 
 class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
   HomeViewDesktop({super.key});
   final dynamicFormKey = GlobalKey<DynamicFormState>();
 
-  @override
+ @override
   Widget build(BuildContext context, HomeViewModel viewModel) {
     return FutureBuilder(
       future: viewModel.checkBackendAvailability(),
       builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+        var logger = Logger('MyLogger');
+
+        // Log the snapshot
+        logger.warning('Snapshot: ${snapshot.toString()}');
+        logger.warning('Snapshot.data: ${snapshot.data.toString()}');
+
         if (snapshot.connectionState == ConnectionState.waiting) {
           // If the future is still running (i.e., the backend availability check is still in progress), 
           // show a loading indicator
@@ -49,6 +56,7 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
       },
     );
   }
+  
 
   Widget buildMainWidget(BuildContext context, HomeViewModel viewModel) {
     String recordingTitleText = 'Provide the title of the recording:';

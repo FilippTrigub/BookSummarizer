@@ -17,11 +17,11 @@ services:
     build:
       context: ../UI
       dockerfile: Dockerfile
+      args:
+        - API_URI=localhost
     restart: always
     ports:
       - 80:80
-    environment:
-      - API_URI=api
     depends_on:
       - api
     networks:

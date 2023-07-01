@@ -23,7 +23,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-APP_URI = '0.0.0.0'
+HOST_IFACE = '0.0.0.0'
 APP_PORT = 8081
 
 
@@ -128,7 +128,7 @@ if __name__ == "__main__":
         if dir_name not in os.listdir():
             os.mkdir(dir_name)
 
-    uvicorn.run(app, host=APP_URI, port=APP_PORT)
+    uvicorn.run(app, host=HOST_IFACE, port=APP_PORT)
 
     # user_input = UserInput
     # user_input.title = 'test'

@@ -20,7 +20,9 @@ def send_mail(recipient_email, subject, attachment_paths, book_title):
     msg['Subject'] = subject
 
     # Add your message body
-    msg.attach(MIMEText("foo", 'plain'))
+    with open('email_text.txt') as file:
+        text = file.read()
+    msg.attach(MIMEText(text, 'utf-8'))
 
     # Open the file in binary mode
     for path in attachment_paths:
