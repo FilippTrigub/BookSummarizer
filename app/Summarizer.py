@@ -98,20 +98,23 @@ class Summarizer:
             loop_threshold -= 1
             if loop_threshold == 0 or time.time() > timeout:
                 if loop_threshold == 0:
-                    print('Loop count exceeded.')
+                    print(f'Loop threshold exceeded.')
                 else:
-                    print('Timeout reached.')
-                reset = input('Reset parameters and continue? (y/n)')
-                if reset == 'y':
-                    timeout, loop_threshold = self._set_loop_threshold_and_timeout(len_text)
+                    print('Timeout (60 sec) reached.')
+                if os.getenv('DEV'):
+                    reset = input('Reset parameters and continue? (y/n)')
+                    if reset == 'y':
+                        timeout, loop_threshold = self._set_loop_threshold_and_timeout(len_text)
             if self.TOKENS_USED > self.TOKEN_THRESHOLD:
                 print(f'Used up {self.TOKENS_USED}.')
-                reset = input('Double threshold? (y/n)')
-                if reset == 'y':
-                    self.TOKEN_THRESHOLD *= 2
+                if os.getenv('DEV'):
+                    reset = input('Double threshold? (y/n)')
+                    if reset == 'y':
+                        self.TOKEN_THRESHOLD *= 2
 
         if len(chunks) > 1:
             print('Summarization did not converge.')
+            raise Exception #todo specify exception
 
         return summary
 

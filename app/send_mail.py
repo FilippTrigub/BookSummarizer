@@ -5,6 +5,8 @@ from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email import encoders
 
+from email_text import email_text
+
 
 def send_mail(recipient_email, subject, attachment_paths, book_title):
     # Set up the SMTP server
@@ -20,9 +22,9 @@ def send_mail(recipient_email, subject, attachment_paths, book_title):
     msg['Subject'] = subject
 
     # Add your message body
-    with open('email_text.txt') as file:
-        text = file.read()
-    msg.attach(MIMEText(text, 'utf-8'))
+    print(os.getcwd())
+    print(os.listdir())
+    msg.attach(MIMEText(email_text, 'utf-8'))
 
     # Open the file in binary mode
     for path in attachment_paths:

@@ -1,19 +1,19 @@
 version: '3.8'
 
 services:
-  api:
-    image: generalregistry.azurecr.io/booksummarizer_api
+  app:
+    image: generalregistry.azurecr.io/audiosummarizer_api
     build:
-      context: ../api
+      context: ../app
       dockerfile: Dockerfile
     restart: always
     ports:
       - 8081:8081
     networks:
-      - book-summarizer-network
+      - audio-summarizer-network
 
   ui:
-    image: generalregistry.azurecr.io/booksummarizer_ui
+    image: generalregistry.azurecr.io/audiosummarizer_ui
     build:
       context: ../UI
       dockerfile: Dockerfile
@@ -23,10 +23,10 @@ services:
     ports:
       - 80:80
     depends_on:
-      - api
+      - app
     networks:
-      - book-summarizer-network
+      - audio-summarizer-network
 
 
 networks:
-  book-summarizer-network:
+  audio-summarizer-network:
