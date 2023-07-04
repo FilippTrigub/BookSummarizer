@@ -65,37 +65,8 @@ async def run_summarization(user_input: UserInput):
     return {"status": 200}
 
 
-@app.post("/transcribe_and_summarize")
-def transcribe_and_summarize(user_input: UserInput):
-    load_dotenv()
-    openai.api_key = os.getenv('OPENAI_API_KEY')
-
-    timestamp = datetime.now().strftime('%Y_%m_%d_%H_%M_%S') + '_'
-
-    # set paths
-    transcription_path = os.path.join('transcriptions', timestamp + user_input.title)
-    book_summary_path = os.path.join(
-        'book_summaries',
-        timestamp + user_input.title)
-    chapter_summary_path = os.path.join(
-        'chapter_summaries',
-        timestamp + user_input.title)
-    costs_path = os.path.join('openai_costs', timestamp + user_input.title[:-4] + '.json')
-
-    # transcribe file
-    print('Transcribe audio file.')
-    transcriber = Transcriber()
-
-    transcriptions = transcriber.transcribe(user_input.file_name, fp16=False)
-    save_list_to_file(transcription_path, transcriptions)
-
-    # summarize
-    print('Summarize transcribed text.')
-    summary_of_book, summaries_of_parts, tokens_used, text_length = Summarizer().summarize_book(
-        transcription_path,
-        user_input.delimiters,
-        user_input.title)
-
+def save_and_send(book_summary_path, summary_of_book, chapter_summary_path, summaries_of_parts, tokens_used,
+                  text_length, costs_path, user_input):
     print('Save results.')
     save_list_to_file(
         book_summary_path,
@@ -121,6 +92,73 @@ def transcribe_and_summarize(user_input: UserInput):
               subject='Your Summary is here!',
               attachment_paths=[book_summary_path, chapter_summary_path],
               book_title=user_input.title)
+
+
+@app.post("/transcribe_and_summarize")
+def transcribe_and_summarize(user_input: UserInput):
+    transcription_path, book_summary_path, chapter_summary_path, costs_path = set_up_params(user_input)
+
+    # transcribe file
+    print('Transcribe audio file.')
+    transcriber = Transcriber()
+
+    transcriptions = transcriber.transcribe(user_input.file_name, fp16=False)
+    save_list_to_file(transcription_path, transcriptions)
+
+    # summarize
+    print('Summarize transcribed text.')
+    summary_of_book, summaries_of_parts, tokens_used, text_length = Summarizer().summarize_book(
+        transcriptions,
+        user_input.delimiters,
+        user_input.title,
+        load_text_from_file=False)
+
+    save_and_send(book_summary_path, summary_of_book, chapter_summary_path, summaries_of_parts, tokens_used,
+                  text_length, costs_path, user_input)
+
+
+@app.post("/transcribe_and_summarize_first_part")
+def transcribe_and_summarize_first_part(user_input: UserInput):
+    transcription_path, book_summary_path, chapter_summary_path, costs_path = set_up_params(user_input)
+
+    # transcribe file
+    print('Transcribe audio file.')
+    transcriber = Transcriber()
+
+    transcriptions = transcriber.transcribe(user_input.file_name, fp16=False)
+    parts = Summarizer().prepare_parts(transcriptions, user_input.delimiters)
+
+    save_list_to_file(transcription_path, parts)
+
+    # summarize
+    print('Summarize first part of the transcribed text.')
+    summary_of_book, summaries_of_parts, tokens_used, text_length = Summarizer().summarize_book(
+        parts[0],
+        user_input.delimiters,
+        user_input.title,
+        load_text_from_file=False)
+
+    save_and_send(book_summary_path, summary_of_book, chapter_summary_path, summaries_of_parts, tokens_used,
+                  text_length, costs_path, user_input)
+
+
+def set_up_params(user_input: UserInput):
+    load_dotenv()
+    openai.api_key = os.getenv('OPENAI_API_KEY')
+
+    timestamp = datetime.now().strftime('%Y_%m_%d_%H_%M_%S') + '_'
+
+    # set paths
+    transcription_path = os.path.join('transcriptions', timestamp + user_input.title)
+    book_summary_path = os.path.join(
+        'book_summaries',
+        timestamp + user_input.title)
+    chapter_summary_path = os.path.join(
+        'chapter_summaries',
+        timestamp + user_input.title)
+    costs_path = os.path.join('openai_costs', timestamp + user_input.title[:-4] + '.json')
+
+    return transcription_path, book_summary_path, chapter_summary_path, costs_path
 
 
 if __name__ == "__main__":

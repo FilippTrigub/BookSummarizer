@@ -26,13 +26,19 @@ class Summarizer:
         self.book_title = None
         self.TOKEN_THRESHOLD = float(os.getenv('CASH_THRESHOLD')) * 1000 / 0.02
 
-    def summarize_book(self, filename: str, delimiters: List[str], book_title: str):
+    def summarize_book(self, text: str, delimiters: List[str], book_title: str, load_text_from_file: bool = False,
+                       filename: str = ''):
         self.book_title = book_title
 
-        text = self._get_text(filename)
+        # prepare parts
+        print("Prepare parts")
+        if load_text_from_file:
+            print('Load text from file')
+            text = self._get_text(filename)
+        parts = self.prepare_parts(text, delimiters)
 
         print("Summarizing parts")
-        summaries_of_parts = self.summarize_parts(text, delimiters)
+        summaries_of_parts = self.summarize_parts(parts)
 
         print("Summarizing book")
         summary_of_book = self.summarize_summaries_of_parts(copy.deepcopy(summaries_of_parts), len(text))
@@ -57,9 +63,12 @@ class Summarizer:
             summary_of_part = summary_of_part + self._summarize_chunk(chunk, summarize_summaries) + '\n'
         return summary_of_part
 
-    def summarize_parts(self, text: str, delimiters: List[str]) -> List[str]:
+    def prepare_parts(self, text: str, delimiters: List[str]):
         parts = self._split_in_parts(text, delimiters)
         parts = self._clean_parts(parts)
+        return parts
+
+    def summarize_parts(self, parts: List[str]) -> List[str]:
         return self._summarize_parts(parts)
 
     def _summarize_parts(self, parts: List[str]) -> List[str]:
@@ -114,7 +123,7 @@ class Summarizer:
 
         if len(chunks) > 1:
             print('Summarization did not converge.')
-            raise Exception #todo specify exception
+            raise Exception  # todo specify exception
 
         return summary
 
@@ -231,7 +240,6 @@ class Summarizer:
             parts.append(unsegmented_text)
 
             return [part.strip() for part in parts if part]
-
 
     @staticmethod
     def _clean_parts(parts: List[str]) -> List[str]:
