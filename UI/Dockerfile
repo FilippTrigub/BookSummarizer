@@ -2,7 +2,7 @@ FROM debian:latest AS build-env
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-ARG API_URI=audo-summarizer-backend--cge2i6y.internal.salmonpebble-c25c1b38.westeurope.azurecontainerapps.io
+ARG API_URI=audio-summarizer.onrender.com
 ENV API_URI=$API_URI
 
 RUN apt-get update
