@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audio-summarizer-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: audio-summarizer-api
+  template:
+    metadata:
+      labels:
+        app: audio-summarizer-api
+    spec:
+      containers:
+      - name: audio-summarizer-api
+        image: audiosummarizeracr.azurecr.io/api:latest
+        ports:
+        - containerPort: 8081
+        imagePullPolicy: Always

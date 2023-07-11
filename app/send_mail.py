@@ -1,0 +1,55 @@
+import os
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email.mime.text import MIMEText
+from email import encoders
+
+from email_text import email_text
+
+
+def send_mail(recipient_email, subject, attachment_paths, book_title):
+    # Set up the SMTP server
+    smtp_server = 'smtp.office365.com'
+    port = 587  # For starttls
+    sender_email = "info@librevita.com"
+    password = "cRgq@@hJf7NJR@nF"
+
+    # Create a multipart message
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = recipient_email
+    msg['Subject'] = subject
+
+    # Add your message body
+    print(os.getcwd())
+    print(os.listdir())
+    msg.attach(MIMEText(email_text, 'utf-8'))
+
+    # Open the file in binary mode
+    for path in attachment_paths:
+        with open(path, "rb") as attachment:
+            part = MIMEBase("application", "octet-stream")
+            part.set_payload(attachment.read())
+
+    # Encode to base64
+    encoders.encode_base64(part)
+
+    # Add header
+    part.add_header("Content-Disposition", f"attachment; filename=Summary of {book_title}.txt")
+
+    # Add attachment to message
+    msg.attach(part)
+
+    # Use the SMTP server to send the email
+    server = smtplib.SMTP(smtp_server, port)
+    server.starttls()
+    server.login(sender_email, password)
+    text = msg.as_string()
+    server.sendmail(sender_email, recipient_email, text)
+    server.quit()
+    print("Mail sent!")
+
+
+if __name__ == "__main__":
+    send_mail('filipp.trigub@gmail.com', 'bar', os.path.join('book_summaries', '2023_06_22_21_28_03_test'), 'test')

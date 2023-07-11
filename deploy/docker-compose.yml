@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  app:
+    image: audiosummarizeracr.azurecr.io/api
+    build:
+      context: ../app
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 8081:8081
+    networks:
+      - audio-summarizer-network
+
+  ui:
+    image: audiosummarizeracr.azurecr.io/ui
+    build:
+      context: ../UI
+      dockerfile: Dockerfile
+      args:
+        - API_URI=localhost:8081
+    restart: always
+    ports:
+      - 80:80
+    depends_on:
+      - app
+    networks:
+      - audio-summarizer-network
+
+
+networks:
+  audio-summarizer-network:
