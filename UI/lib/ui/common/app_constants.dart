@@ -5,5 +5,5 @@ const double kdDesktopMaxContentWidth = 1150;
 const double kdDesktopMaxContentHeight = 750;
 
 // Backend URI and port
-const backendUri = String.fromEnvironment('API_URI', defaultValue: 'localhost');
+const backendUri = String.fromEnvironment('API_URI', defaultValue: 'http://localhost:8081');
 const String backendEndpoint = backendUri;

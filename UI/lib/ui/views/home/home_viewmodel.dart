@@ -30,6 +30,7 @@ class HomeViewModel extends BaseViewModel {
   final descriptionController = TextEditingController();
   final emailController = TextEditingController();
   final nameController = TextEditingController();
+  final modelKeyController = TextEditingController();
 
   final _dialogService = locator<DialogService>();
   final _bottomSheetService = locator<BottomSheetService>();
@@ -83,6 +84,7 @@ class HomeViewModel extends BaseViewModel {
         'email': emailController.text,
         'delimiters': partDelimiters,
         'file_name': pickedFileName,
+        'model_key': modelKeyController.text,
       }),
     );
 

@@ -62,11 +62,13 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
     String recordingTitleText = 'Provide the title of the recording:';
     String recordingDescriptionText = 'Describe the content to help the AI:';
     String emailText = 'Please provide your email address so that we can send you the summary:';
-    String nameText = 'Finally please allow us to address you with your name:';
+    String nameText = 'Please allow us to address you with your name:';
+    String modelKeyText = 'Finally please provide your OpenAI key:';
     String recordingTitleHint = 'Title';
     String recordingDescriptionHint = 'Description';
     String emailHint = 'Email';
     String nameHint = 'Name';
+    String modelKeyHint = 'sk-...';
 
     return Scaffold(
       body: Center(
@@ -154,6 +156,17 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
                       controller: viewModel.nameController,
                       decoration: InputDecoration(
                         hintText: nameHint,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(
+                      height: 25,
+                    ),
+                    Text(modelKeyText),
+                    TextField(
+                      controller: viewModel.modelKeyController,
+                      decoration: InputDecoration(
+                        hintText: modelKeyHint,
                       ),
                       textAlign: TextAlign.center,
                     ),

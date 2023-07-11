@@ -293,7 +293,6 @@ if __name__ == '__main__':
     load_dotenv()
     timestamp = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
 
-    openai.api_key = os.getenv('OPENAI_API_KEY')
     book_file_name = 'Getting_To_Yes_Negotiating_Agreement_Without_Giving_In_Roger_Fisher_and_William_Ury.txt'
     delimiters = ['Part \d+\. ']
 

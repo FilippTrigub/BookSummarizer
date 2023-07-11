@@ -52,6 +52,7 @@ class UserInput(BaseModel):
     email: str
     delimiters: List[str]
     file_name: str
+    model_key: str
 
 
 @app.post("/run_summarization")
@@ -144,7 +145,7 @@ def transcribe_and_summarize_first_part(user_input: UserInput):
 
 def set_up_params(user_input: UserInput):
     load_dotenv()
-    openai.api_key = os.getenv('OPENAI_API_KEY')
+    openai.api_key = user_input.model_key
 
     timestamp = datetime.now().strftime('%Y_%m_%d_%H_%M_%S') + '_'
 
