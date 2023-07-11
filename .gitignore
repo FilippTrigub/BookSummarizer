@@ -42,6 +42,13 @@
 /UI/android/app/profile
 /UI/android/app/release
 
+# terraform files
+/deploy/terraform_aws/.terraform
+/deploy/terraform_aws/.terraform.lock.hcl
+/deploy/terraform_azure/.terraform
+/deploy/terraform_azure/.terraform.lock.hcl
+/deploy/terraform_azure/terraform.tfstate
+
 
 .env
 .idea/
