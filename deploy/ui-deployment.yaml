@@ -14,6 +14,8 @@ spec:
     spec:
       containers:
       - name: audio-summarizer-ui
-        image: <acrName>.azurecr.io/audio-summarizer/ui:v1
+        image: audiosummarizeracr.azurecr.io/ui:latest
         ports:
         - containerPort: 80
+        imagePullPolicy: Always
+

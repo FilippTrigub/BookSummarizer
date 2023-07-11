@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: generalregistry.azurecr.io/audiosummarizer_api
+    image: audiosummarizeracr.azurecr.io/api
     build:
       context: ../app
       dockerfile: Dockerfile
@@ -13,12 +13,12 @@ services:
       - audio-summarizer-network
 
   ui:
-    image: generalregistry.azurecr.io/audiosummarizer_ui
+    image: audiosummarizeracr.azurecr.io/ui
     build:
       context: ../UI
       dockerfile: Dockerfile
       args:
-        - API_URI=localhost
+        - API_URI=localhost:8081
     restart: always
     ports:
       - 80:80

@@ -1,0 +1,4 @@
+# connect acr to aks
+
+az aks update -n audioSummarizerAks -g audioSummarizer --attach-acr audioSummarizerAcr
+
