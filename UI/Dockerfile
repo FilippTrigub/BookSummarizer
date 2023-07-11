@@ -2,7 +2,7 @@ FROM debian:latest AS build-env
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-ARG API_URI=audio-summarizer.onrender.com
+ARG API_URI=https://audio-summarizer.onrender.com
 ENV API_URI=$API_URI
 
 RUN apt-get update
