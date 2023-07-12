@@ -4,11 +4,10 @@ from typing import List, Dict
 
 import whisper
 from dotenv import load_dotenv
-from fastapi.logger import logger
 
 from huggingsound import SpeechRecognitionModel
 
-from Logger import log_info
+from src.GlobalLogger import log_info
 
 
 class Transcriber:
@@ -38,8 +37,14 @@ class Transcriber:
 
     def _get_model(self):
         if self.model_source == "whisper":
-            return whisper.load_model("base")
+            model_path = os.path.join("src", "whisper_model", "base.pt")
+            if os.path.exists(model_path):
+                log_info('Load local model.')
+                return whisper.load_model(model_path)
+            log_info('Load model from web.')
+            return whisper.load_model('base')
         elif self.model_source == "huggingface":
+            log_info('Load model from web.')
             return SpeechRecognitionModel("jonatasgrosman/wav2vec2-large-xlsr-53-english")
 
     def get_texts(self, transcriptions):
@@ -49,14 +54,14 @@ class Transcriber:
             return transcriptions
 
 
-def save_list_to_file(filename: str, list: List[str]):
+def save_list_to_file(filename: str, to_be_saved_list: List[str]):
     log_info(f'Save list to file: {filename}')
     try:
         log_info('Making directory.')
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, 'w') as file:
             log_info('Saving to file.')
-            for text in list:
+            for text in to_be_saved_list:
                 file.write(text)
         return True
     except Exception as e:
@@ -84,4 +89,4 @@ if __name__ == '__main__':
 
     for audiobook in audiobooks:
         transcriptions = transcriber.transcribe(os.path.join('audiobooks', audiobook))
-        save_list_to_file(os.path.join('transcriptions', audiobook.replace('.mp3', '.txt')), transcriptions)
+        save_list_to_file(os.path.join('../transcriptions', audiobook.replace('.mp3', '.txt')), transcriptions)

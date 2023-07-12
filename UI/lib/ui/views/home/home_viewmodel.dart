@@ -55,7 +55,7 @@ class HomeViewModel extends BaseViewModel {
     _dialogService.showCustomDialog(
       variant: DialogType.infoAlert,
       title: 'Get in contact with the GenMyBot team!',
-      description: '<ADD FORM>',
+      description: 'info@genmybot.com',
     );
   }
 

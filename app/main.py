@@ -11,10 +11,10 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from Logger import log_info
-from Summarizer import Summarizer
-from Transcriber import Transcriber, save_list_to_file, save_dict_to_file
-from send_mail import send_mail
+from src.GlobalLogger import log_info
+from src.Summarizer import Summarizer
+from src.Transcriber import Transcriber, save_list_to_file, save_dict_to_file
+from src.send_mail import send_mail
 
 app = FastAPI(title='Audio Summarizer', debug=True)
 app.add_middleware(
@@ -155,14 +155,18 @@ def set_up_params(user_input: UserInput):
     timestamp = datetime.now().strftime('%Y_%m_%d_%H_%M_%S') + '_'
 
     # set paths
-    transcription_path = os.path.join('transcriptions', timestamp + user_input.title)
+    transcription_path = os.path.join(
+        'transcriptions',
+        timestamp + user_input.title + '.txt')
     book_summary_path = os.path.join(
         'book_summaries',
-        timestamp + user_input.title)
+        timestamp + user_input.title + '.txt')
     chapter_summary_path = os.path.join(
         'chapter_summaries',
-        timestamp + user_input.title)
-    costs_path = os.path.join('openai_costs', timestamp + user_input.title[:-4] + '.json')
+        timestamp + user_input.title + '.txt')
+    costs_path = os.path.join(
+        'openai_costs',
+        timestamp + user_input.title[:-4] + '.json')
 
     return transcription_path, book_summary_path, chapter_summary_path, costs_path
 

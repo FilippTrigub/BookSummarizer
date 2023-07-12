@@ -3,15 +3,14 @@ import os
 import re
 import time
 from datetime import datetime
-from typing import List, Tuple, Union
+from typing import List, Tuple
 
 import tiktoken
 import openai
 from dotenv import load_dotenv
-from fastapi.logger import logger
 
-from Logger import log_info
-from Transcriber import save_list_to_file, save_dict_to_file
+from src.GlobalLogger import log_info
+from src.Transcriber import save_list_to_file, save_dict_to_file
 
 
 class Summarizer:
@@ -302,18 +301,18 @@ if __name__ == '__main__':
     # delimiters = ['Part 1.', 'test 2.', 'Past 3.']
 
     summary_of_book, summaries_of_parts, tokens_used, text_length = Summarizer().summarize_book(
-        os.path.join('transcriptions', book_file_name),
+        os.path.join('../transcriptions', book_file_name),
         delimiters,
         'Test')
 
     save_list_to_file(
         os.path.join(
-            'book_summaries',
+            '../book_summaries',
             timestamp + book_file_name),
         [summary_of_book])
     save_list_to_file(
         os.path.join(
-            'chapter_summaries',
+            '../chapter_summaries',
             timestamp + book_file_name),
         summaries_of_parts)
 

@@ -2,9 +2,11 @@ FROM python:3.10.12-slim
 
 WORKDIR /app
 
-ADD . /app
-
 COPY .env.template .env
+COPY __init__.py __init__.py
+COPY main.py main.py
+COPY src src
+COPY requirements.txt requirements.txt
 
 RUN pip install --no-cache-dir -r requirements.txt
 RUN apt-get -y update

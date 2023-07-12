@@ -5,18 +5,17 @@ from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email import encoders
 
-from fastapi.logger import logger
 
-from Logger import log_info
-from email_text import email_text
+from src.GlobalLogger import log_info
+from src.email_text import email_text
 
 
 def send_mail(recipient_email, subject, attachment_paths, book_title):
     # Set up the SMTP server
-    smtp_server = 'smtp.office365.com'
+    smtp_server = 'smtp.dreamhost.com'
     port = 587  # For starttls
-    sender_email = "info@librevita.com"
-    password = "cRgq@@hJf7NJR@nF"
+    sender_email = "filipp@trigub.tech"
+    password = "Mf@ttA6GqtmK9&zn"
 
     # Create a multipart message
     msg = MIMEMultipart()
@@ -55,4 +54,4 @@ def send_mail(recipient_email, subject, attachment_paths, book_title):
 
 
 if __name__ == "__main__":
-    send_mail('filipp.trigub@gmail.com', 'bar', os.path.join('book_summaries', '2023_06_22_21_28_03_test'), 'test')
+    send_mail('filipp.trigub@gmail.com', 'bar', os.path.join('../book_summaries', '2023_06_22_21_28_03_test'), 'test')

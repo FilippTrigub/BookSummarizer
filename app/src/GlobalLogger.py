@@ -1,3 +1,5 @@
+import sys
+
 from fastapi.logger import logger
 import logging
 import threading
@@ -24,15 +26,23 @@ class SingletonMeta(type):
 class GlobalLogger(metaclass=SingletonMeta):
 
     def __new__(cls, *args, **kwargs):
-        # set up logging
+        return cls.set_up_logging()
+
+    @staticmethod
+    def set_up_logging():
         gunicorn_logger = logging.getLogger('gunicorn.error')
-        logger.handlers = gunicorn_logger.handlers
+        logger.addHandler(gunicorn_logger.handlers)
         logger.setLevel(gunicorn_logger.level)
         return logger
 
 
-def log_info(message):
-    global_logger = GlobalLogger()
+def log_info(message, setup_logging=False):
+    if setup_logging:
+        global_logger = GlobalLogger().set_up_logging()
+    else:
+        global_logger = GlobalLogger()
 
+    # log locally and to gunicorn logger
     print(message)
     global_logger.info(message)
+    sys.stdout.flush()

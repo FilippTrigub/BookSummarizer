@@ -17,46 +17,52 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
 
  @override
   Widget build(BuildContext context, HomeViewModel viewModel) {
-    return FutureBuilder(
-      future: viewModel.checkBackendAvailability(),
-      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-        var logger = Logger('MyLogger');
+    if (isBackendAvailable) {
+        // Backend was already found
+        return buildMainWidget(context, viewModel);
+    }
+    else {
+      return FutureBuilder(
+        future: viewModel.checkBackendAvailability(),
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+          var logger = Logger('MyLogger');
 
-        // Log the snapshot
-        logger.warning('Snapshot: ${snapshot.toString()}');
-        logger.warning('Snapshot.data: ${snapshot.data.toString()}');
+          // Log the snapshot
+          logger.warning('Snapshot: ${snapshot.toString()}');
+          logger.warning('Snapshot.data: ${snapshot.data.toString()}');
 
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          // If the future is still running (i.e., the backend availability check is still in progress), 
-          // show a loading indicator
-          return const StartupView();
-        }
-        else if (snapshot.hasData && snapshot.data == true) {
-          // If the future has completed successfully and the backend is available, show the main widget
-          return buildMainWidget(context, viewModel);
-        }
-        else {
-          // If the future has completed with an error or the backend is not available, 
-          // show the main widget with an overlay indicating that the backend is not available
-          return Stack(
-            children: [
-              buildMainWidget(context, viewModel),
-              Container(
-                color: Colors.black54,  // Semi-transparent black
-                child: const Center(
-                  child: Text(
-                    'Backend is not available at $backendEndpoint',
-                    style: TextStyle(color: Colors.white, fontSize: 24),
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // If the future is still running (i.e., the backend availability check is still in progress), 
+            // show a loading indicator
+            return const StartupView();
+          }
+          else if (snapshot.hasData && snapshot.data == true) {
+            // If the future has completed successfully and the backend is available, show the main widget
+            isBackendAvailable = true;
+            return buildMainWidget(context, viewModel);
+          }
+          else {
+            // If the future has completed with an error or the backend is not available, 
+            // show the main widget with an overlay indicating that the backend is not available
+            return Stack(
+              children: [
+                buildMainWidget(context, viewModel),
+                Container(
+                  color: Colors.black54,  // Semi-transparent black
+                  child: const Center(
+                    child: Text(
+                      'Backend is not available at $backendEndpoint',
+                      style: TextStyle(color: Colors.white, fontSize: 24),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          );
-        }
-      },
-    );
-  }
-  
+              ],
+            );
+          }
+        },
+      );
+    }
+  }  
 
   Widget buildMainWidget(BuildContext context, HomeViewModel viewModel) {
     String recordingTitleText = 'Provide the title of the recording:';
