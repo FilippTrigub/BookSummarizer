@@ -56,3 +56,6 @@
 .idea/
 
 /audiobooks/
+/app/transcriptions/
+/app/book_summaries/
+/app/chapter_summaries/
