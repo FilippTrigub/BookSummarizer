@@ -8,7 +8,9 @@ from typing import List, Tuple, Union
 import tiktoken
 import openai
 from dotenv import load_dotenv
+from fastapi.logger import logger
 
+from Logger import log_info
 from Transcriber import save_list_to_file, save_dict_to_file
 
 
@@ -31,25 +33,25 @@ class Summarizer:
         self.book_title = book_title
 
         # prepare parts
-        print("Prepare parts")
+        log_info("Prepare parts")
         if load_text_from_file:
-            print('Load text from file')
+            log_info('Load text from file')
             text = self._get_text(filename)
         parts = self.prepare_parts(text, delimiters)
 
-        print("Summarizing parts")
+        log_info("Summarizing parts")
         summaries_of_parts = self.summarize_parts(parts)
 
-        print("Summarizing book")
+        log_info("Summarizing book")
         summary_of_book = self.summarize_summaries_of_parts(copy.deepcopy(summaries_of_parts), len(text))
 
-        print("Summarizing book finished. Formatting summary")
+        log_info("Summarizing book finished. Formatting summary")
         summary_of_book, summaries_of_parts = self.format_summaries(summary_of_book, summaries_of_parts)
 
         return summary_of_book, summaries_of_parts, self.TOKENS_USED, len(text)
 
     def summarize_summaries_of_parts(self, summaries_of_parts: List[str], len_text: int) -> str:
-        print("Summarizing summaries of parts")
+        log_info("Summarizing summaries of parts")
         # Summarize summaries of parts initially
         summary_of_book = self.summarize_concatenated_summaries(summaries_of_parts, True)
         # Loop recursively until only a short summary is left
@@ -74,7 +76,7 @@ class Summarizer:
     def _summarize_parts(self, parts: List[str]) -> List[str]:
         summaries_of_parts = []
         for part in parts:
-            print(f'Summarizing part {parts.index(part) + 1} of {len(parts)}')
+            log_info(f'Summarizing part {parts.index(part) + 1} of {len(parts)}')
             summaries_of_parts.append(self.summarize_part(part))
         return summaries_of_parts
 
@@ -97,8 +99,8 @@ class Summarizer:
                 and loop_threshold > 0 \
                 and time.time() < timeout \
                 and self.TOKENS_USED < self.TOKEN_THRESHOLD:
-            print(f"Running recursive summarization. "
-                  f"Loop {loop_threshold}/{self.DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS}.")
+            log_info(f"Running recursive summarization. "
+                        f"Loop {loop_threshold}/{self.DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS}.")
             # with iterations, chunks should get smaller so that list of summaries gets smaller
             # until only 1 element remains.
             summary = self.summarize_concatenated_summaries(chunks, True)
@@ -107,22 +109,22 @@ class Summarizer:
             loop_threshold -= 1
             if loop_threshold == 0 or time.time() > timeout:
                 if loop_threshold == 0:
-                    print(f'Loop threshold exceeded.')
+                    log_info(f'Loop threshold exceeded.')
                 else:
-                    print('Timeout (60 sec) reached.')
+                    log_info('Timeout (60 sec) reached.')
                 if os.getenv('DEV'):
                     reset = input('Reset parameters and continue? (y/n)')
                     if reset == 'y':
                         timeout, loop_threshold = self._set_loop_threshold_and_timeout(len_text)
             if self.TOKENS_USED > self.TOKEN_THRESHOLD:
-                print(f'Used up {self.TOKENS_USED}.')
+                log_info(f'Used up {self.TOKENS_USED}.')
                 if os.getenv('DEV'):
                     reset = input('Double threshold? (y/n)')
                     if reset == 'y':
                         self.TOKEN_THRESHOLD *= 2
 
         if len(chunks) > 1:
-            print('Summarization did not converge.')
+            log_info('Summarization did not converge.')
             raise Exception  # todo specify exception
 
         return summary
@@ -315,9 +317,9 @@ if __name__ == '__main__':
             timestamp + book_file_name),
         summaries_of_parts)
 
-    print(f"Used up {tokens_used} tokens.\n"
-          f"This is {tokens_used * 0.02 / 1000} $\n"
-          f"This is {tokens_used * 0.02 / 1000 / text_length * 1000} $ per 1000 characters.")
+    log_info(f"Used up {tokens_used} tokens.\n"
+                f"This is {tokens_used * 0.02 / 1000} $\n"
+                f"This is {tokens_used * 0.02 / 1000 / text_length * 1000} $ per 1000 characters.")
 
     save_dict_to_file(
         os.path.join('openai_costs', timestamp + book_file_name[:-4] + '.json'),

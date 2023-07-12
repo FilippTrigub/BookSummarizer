@@ -1,21 +1,22 @@
 import os
 import shutil
 import threading
-from datetime import datetime
-from typing import List
-
 import openai
 import uvicorn
+
+from datetime import datetime
+from typing import List
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from Logger import log_info
 from Summarizer import Summarizer
 from Transcriber import Transcriber, save_list_to_file, save_dict_to_file
 from send_mail import send_mail
 
-app = FastAPI()
+app = FastAPI(title='Audio Summarizer', debug=True)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -25,6 +26,10 @@ app.add_middleware(
 )
 HOST_IFACE = '0.0.0.0'
 APP_PORT = 8081
+
+for dir_name in ['transcriptions', 'book_summaries', 'chapter_summaries']:
+    if dir_name not in os.listdir():
+        os.mkdir(dir_name)
 
 
 @app.get("/")
@@ -41,7 +46,7 @@ async def check():
 async def upload_file(file: UploadFile = File(...)):
     with open(file.filename, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-        print('File uploaded.')
+        log_info('File uploaded.')
     return {"status": 200}
 
 
@@ -58,17 +63,17 @@ class UserInput(BaseModel):
 @app.post("/run_summarization")
 async def run_summarization(user_input: UserInput):
     # Start a new thread that runs the summarization process
-    print('Run summarization in separate thread.')
+    log_info('Run summarization in separate thread.')
     threading.Thread(target=transcribe_and_summarize, args=(user_input,)).start()
 
     # Immediately return a status of 200
-    print('Return success status.')
+    log_info('Return success status.')
     return {"status": 200}
 
 
 def save_and_send(book_summary_path, summary_of_book, chapter_summary_path, summaries_of_parts, tokens_used,
                   text_length, costs_path, user_input):
-    print('Save results.')
+    log_info('Save results.')
     save_list_to_file(
         book_summary_path,
         [summary_of_book])
@@ -76,9 +81,9 @@ def save_and_send(book_summary_path, summary_of_book, chapter_summary_path, summ
         chapter_summary_path,
         summaries_of_parts)
 
-    print(f"Used up {tokens_used} tokens.\n"
-          f"This is {tokens_used * 0.02 / 1000} $\n"
-          f"This is {tokens_used * 0.02 / 1000 / text_length * 1000} $ per 1000 characters.")
+    log_info(f"Used up {tokens_used} tokens.\n"
+             f"This is {tokens_used * 0.02 / 1000} $\n"
+             f"This is {tokens_used * 0.02 / 1000 / text_length * 1000} $ per 1000 characters.")
 
     save_dict_to_file(
         costs_path,
@@ -100,14 +105,14 @@ def transcribe_and_summarize(user_input: UserInput):
     transcription_path, book_summary_path, chapter_summary_path, costs_path = set_up_params(user_input)
 
     # transcribe file
-    print('Transcribe audio file.')
+    log_info('Transcribe audio file.')
     transcriber = Transcriber()
 
     transcriptions = transcriber.transcribe(user_input.file_name, fp16=False)
     save_list_to_file(transcription_path, transcriptions)
 
     # summarize
-    print('Summarize transcribed text.')
+    log_info('Summarize transcribed text.')
     summary_of_book, summaries_of_parts, tokens_used, text_length = Summarizer().summarize_book(
         transcriptions,
         user_input.delimiters,
@@ -123,7 +128,7 @@ def transcribe_and_summarize_first_part(user_input: UserInput):
     transcription_path, book_summary_path, chapter_summary_path, costs_path = set_up_params(user_input)
 
     # transcribe file
-    print('Transcribe audio file.')
+    log_info('Transcribe audio file.')
     transcriber = Transcriber()
 
     transcriptions = transcriber.transcribe(user_input.file_name, fp16=False)
@@ -132,7 +137,7 @@ def transcribe_and_summarize_first_part(user_input: UserInput):
     save_list_to_file(transcription_path, parts)
 
     # summarize
-    print('Summarize first part of the transcribed text.')
+    log_info('Summarize first part of the transcribed text.')
     summary_of_book, summaries_of_parts, tokens_used, text_length = Summarizer().summarize_book(
         parts[0],
         user_input.delimiters,
@@ -163,10 +168,7 @@ def set_up_params(user_input: UserInput):
 
 
 if __name__ == "__main__":
-    for dir_name in ['transcriptions', 'book_summaries', 'chapter_summaries']:
-        if dir_name not in os.listdir():
-            os.mkdir(dir_name)
-
+    log_info('Start App')
     uvicorn.run(app, host=HOST_IFACE, port=APP_PORT)
 
     # user_input = UserInput

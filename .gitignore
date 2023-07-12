@@ -45,6 +45,8 @@
 # terraform files
 /deploy/terraform_aws/.terraform
 /deploy/terraform_aws/.terraform.lock.hcl
+/deploy/terraform_aws/terraform.tfstate
+
 /deploy/terraform_azure/.terraform
 /deploy/terraform_azure/.terraform.lock.hcl
 /deploy/terraform_azure/terraform.tfstate

@@ -5,6 +5,9 @@ from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email import encoders
 
+from fastapi.logger import logger
+
+from Logger import log_info
 from email_text import email_text
 
 
@@ -22,8 +25,8 @@ def send_mail(recipient_email, subject, attachment_paths, book_title):
     msg['Subject'] = subject
 
     # Add your message body
-    print(os.getcwd())
-    print(os.listdir())
+    log_info(os.getcwd())
+    log_info(os.listdir())
     msg.attach(MIMEText(email_text, 'utf-8'))
 
     # Open the file in binary mode
@@ -48,7 +51,7 @@ def send_mail(recipient_email, subject, attachment_paths, book_title):
     text = msg.as_string()
     server.sendmail(sender_email, recipient_email, text)
     server.quit()
-    print("Mail sent!")
+    log_info("Mail sent!")
 
 
 if __name__ == "__main__":

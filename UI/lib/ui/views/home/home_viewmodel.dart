@@ -105,6 +105,7 @@ class HomeViewModel extends BaseViewModel {
     descriptionController.clear();
     emailController.clear();
     nameController.clear();
+    modelKeyController.clear();
     pickedFileBytes = null;
     pickedFileName = null;
     notifyListeners();

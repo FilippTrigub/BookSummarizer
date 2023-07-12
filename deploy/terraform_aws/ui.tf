@@ -1,17 +1,31 @@
 # ui.tf
 resource "aws_s3_bucket" "ui_bucket" {
-  bucket = "my-flutter-ui"
-  acl    = "public-read"
+  bucket = "audio-summarizer-bucket"
 
-  website {
-    index_document = "index.html"
-    error_document = "error.html"
+  tags = {
+    Name        = "audio-summarizer-bucket"
+    Environment = "Dev"
   }
 }
 
-resource "aws_s3_bucket_object" "object" {
-  bucket = "my-flutter-ui"
-  key    = "index.html"
-  source = "UI/build/web/index.html"
-  acl    = "public-read"
+resource "aws_s3_bucket_website_configuration" "ui_bucket_website_config" {
+  bucket = aws_s3_bucket.ui_bucket.id
+
+  index_document {
+    suffix = "index.html"
+  }
+
+  error_document {
+    key = "error.html"
+  }
+
+  routing_rule {
+    condition {
+      key_prefix_equals = "docs/"
+    }
+    redirect {
+      replace_key_prefix_with = "documents/"
+    }
+  }
 }
+

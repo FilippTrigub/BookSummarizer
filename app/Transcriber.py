@@ -4,8 +4,11 @@ from typing import List, Dict
 
 import whisper
 from dotenv import load_dotenv
+from fastapi.logger import logger
 
 from huggingsound import SpeechRecognitionModel
+
+from Logger import log_info
 
 
 class Transcriber:
@@ -24,6 +27,7 @@ class Transcriber:
             transcriptions = self.model.transcribe(audio_paths, fp16=fp16)
         else:
             transcriptions = self.model.transcribe(audio_paths)
+        log_info('Transcription done.')
         return self.get_texts(transcriptions)
 
     def _get_model_source(self):
@@ -45,25 +49,31 @@ class Transcriber:
             return transcriptions
 
 
-def save_list_to_file(filename: str, transcriptions: List[str]):
+def save_list_to_file(filename: str, list: List[str]):
+    log_info(f'Save list to file: {filename}')
     try:
+        log_info('Making directory.')
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, 'w') as file:
-            for text in transcriptions:
+            log_info('Saving to file.')
+            for text in list:
                 file.write(text)
         return True
     except Exception as e:
-        print(f"An error occurred while saving the file: {str(e)}")
+        log_info(f"An error occurred while saving the file: {str(e)}")
         return False
 
 
 def save_dict_to_file(filename: str, dictionary: Dict[str, str]):
+    log_info(f'Save dict to file: {filename}')
     try:
+        log_info('Making directory.')
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, 'w') as file:
+            log_info('Saving to file.')
             json.dump(dictionary, file)
     except Exception as e:
-        print(f"Failed to save dictionary: {e}")
+        log_info(f"Failed to save dictionary: {e}")
 
 
 if __name__ == '__main__':
