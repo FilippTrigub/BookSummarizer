@@ -31,6 +31,7 @@ class HomeViewModel extends BaseViewModel {
   final emailController = TextEditingController();
   final nameController = TextEditingController();
   final modelKeyController = TextEditingController();
+  final budgetController = TextEditingController();
 
   final _dialogService = locator<DialogService>();
   final _bottomSheetService = locator<BottomSheetService>();
@@ -85,6 +86,7 @@ class HomeViewModel extends BaseViewModel {
         'delimiters': partDelimiters,
         'file_name': pickedFileName,
         'model_key': modelKeyController.text,
+        'budget': budgetController.text,
       }),
     );
 
@@ -106,6 +108,7 @@ class HomeViewModel extends BaseViewModel {
     emailController.clear();
     nameController.clear();
     modelKeyController.clear();
+    budgetController.clear();
     pickedFileBytes = null;
     pickedFileName = null;
     notifyListeners();

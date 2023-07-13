@@ -16,8 +16,8 @@ from src.Transcriber import save_list_to_file, save_dict_to_file
 class Summarizer:
     TOKENS_USED = 0
 
-    DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS = 5
-    DEFAULT_TIMEOUT_IN_MIN_PER_100000_CHARS = 5
+    DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS = None
+    DEFAULT_TIMEOUT_IN_MIN_PER_100000_CHARS = None
     MODEL_NAME = "text-davinci-002"
     MAX_INPUT_TOKENS = 2000
 
@@ -26,10 +26,13 @@ class Summarizer:
     def __init__(self):
         self.book_title = None
         self.TOKEN_THRESHOLD = float(os.getenv('CASH_THRESHOLD')) * 1000 / 0.02
+        self.DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS = int(os.getenv('DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS'))
+        self.DEFAULT_TIMEOUT_IN_MIN_PER_100000_CHARS = int(os.getenv('DEFAULT_TIMEOUT_IN_MIN_PER_100000_CHARS'))
 
     def summarize_book(self, text: str, delimiters: List[str], book_title: str, load_text_from_file: bool = False,
-                       filename: str = ''):
+                       filename: str = '', user_budget: str = None):
         self.book_title = book_title
+        self.TOKEN_THRESHOLD = float(user_budget) * 1000 / 0.02 if user_budget else self.TOKEN_THRESHOLD
 
         # prepare parts
         log_info("Prepare parts")
@@ -99,22 +102,18 @@ class Summarizer:
                 and time.time() < timeout \
                 and self.TOKENS_USED < self.TOKEN_THRESHOLD:
             log_info(f"Running recursive summarization. "
-                        f"Loop {loop_threshold}/{self.DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS}.")
+                     f"Loop {loop_threshold}/{self.DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS}.")
             # with iterations, chunks should get smaller so that list of summaries gets smaller
             # until only 1 element remains.
             summary = self.summarize_concatenated_summaries(chunks, True)
             chunks = self.split_into_chunks(summary)
 
             loop_threshold -= 1
-            if loop_threshold == 0 or time.time() > timeout:
-                if loop_threshold == 0:
-                    log_info(f'Loop threshold exceeded.')
-                else:
-                    log_info('Timeout (60 sec) reached.')
-                if os.getenv('DEV'):
-                    reset = input('Reset parameters and continue? (y/n)')
-                    if reset == 'y':
-                        timeout, loop_threshold = self._set_loop_threshold_and_timeout(len_text)
+            if loop_threshold == 0 or time.time() > timeout and os.getenv('DEV'):
+                reset = input('Reset parameters and continue? (y/n)')
+                if reset == 'y':
+                    timeout, loop_threshold = self._set_loop_threshold_and_timeout(len_text)
+
             if self.TOKENS_USED > self.TOKEN_THRESHOLD:
                 log_info(f'Used up {self.TOKENS_USED}.')
                 if os.getenv('DEV'):
@@ -124,7 +123,15 @@ class Summarizer:
 
         if len(chunks) > 1:
             log_info('Summarization did not converge.')
-            raise Exception  # todo specify exception
+            if loop_threshold == 0:
+                log_info('Loop threshold exceeded.')
+                summary = 'Summarization unfinished, because loop threshold was exceeded.\n\n' + summary
+            elif time.time() > timeout:
+                log_info('Timeout reached.')
+                summary = 'Summarization unfinished, because timeout was reached.\n\n' + summary
+            elif self.TOKENS_USED > self.TOKEN_THRESHOLD:
+                log_info(f'Used up {self.TOKENS_USED}.')
+                summary = 'Summarization unfinished, because token threshold was reached.\n\n' + summary
 
         return summary
 
@@ -187,7 +194,7 @@ class Summarizer:
         return summary
 
     def _set_loop_threshold_and_timeout(self, len_text: int) -> Tuple[float, int]:
-        timeout = time.time() + 60 * self.DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS * len_text / 100000
+        timeout = time.time() + 60 * self.DEFAULT_TIMEOUT_IN_MIN_PER_100000_CHARS * len_text / 100000
         loop_threshold = max(int(self.DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS * len_text / 100000), 1)
         return timeout, loop_threshold
 
@@ -317,8 +324,8 @@ if __name__ == '__main__':
         summaries_of_parts)
 
     log_info(f"Used up {tokens_used} tokens.\n"
-                f"This is {tokens_used * 0.02 / 1000} $\n"
-                f"This is {tokens_used * 0.02 / 1000 / text_length * 1000} $ per 1000 characters.")
+             f"This is {tokens_used * 0.02 / 1000} $\n"
+             f"This is {tokens_used * 0.02 / 1000 / text_length * 1000} $ per 1000 characters.")
 
     save_dict_to_file(
         os.path.join('openai_costs', timestamp + book_file_name[:-4] + '.json'),

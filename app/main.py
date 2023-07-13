@@ -58,6 +58,7 @@ class UserInput(BaseModel):
     delimiters: List[str]
     file_name: str
     model_key: str
+    budget: str
 
 
 @app.post("/run_summarization")
@@ -114,9 +115,10 @@ def transcribe_and_summarize(user_input: UserInput):
     # summarize
     log_info('Summarize transcribed text.')
     summary_of_book, summaries_of_parts, tokens_used, text_length = Summarizer().summarize_book(
-        transcriptions,
-        user_input.delimiters,
-        user_input.title,
+        text=transcriptions,
+        delimiters = user_input.delimiters,
+        book_title=user_input.title,
+        user_budget=user_input.budget,
         load_text_from_file=False)
 
     save_and_send(book_summary_path, summary_of_book, chapter_summary_path, summaries_of_parts, tokens_used,

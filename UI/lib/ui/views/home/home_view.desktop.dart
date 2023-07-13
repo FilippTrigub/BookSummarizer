@@ -6,6 +6,7 @@ import 'package:test_stacked_web_app/ui/common/ui_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import '../../../app/app.router.dart';
+import '../../common/app_strings.dart';
 import '../startup/startup_view.dart';
 import 'home_viewmodel.dart';
 import 'package:test_stacked_web_app/ui/widgets/dynamic_form.dart';
@@ -65,17 +66,7 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
   }  
 
   Widget buildMainWidget(BuildContext context, HomeViewModel viewModel) {
-    String recordingTitleText = 'Provide the title of the recording:';
-    String recordingDescriptionText = 'Describe the content to help the AI:';
-    String emailText = 'Please provide your email address so that we can send you the summary:';
-    String nameText = 'Please allow us to address you with your name:';
-    String modelKeyText = 'Finally please provide your OpenAI key:';
-    String recordingTitleHint = 'Title';
-    String recordingDescriptionHint = 'Description';
-    String emailHint = 'Email';
-    String nameHint = 'Name';
-    String modelKeyHint = 'sk-...';
-
+    
     return Scaffold(
       body: Center(
         child: SizedBox(
@@ -162,6 +153,17 @@ class HomeViewDesktop extends ViewModelWidget<HomeViewModel> {
                       controller: viewModel.nameController,
                       decoration: InputDecoration(
                         hintText: nameHint,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(
+                      height: 25,
+                    ),
+                    Text(budgetText),
+                    TextField(
+                      controller: viewModel.budgetController,
+                      decoration: InputDecoration(
+                        hintText: budgetHint,
                       ),
                       textAlign: TextAlign.center,
                     ),

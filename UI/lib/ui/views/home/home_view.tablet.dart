@@ -4,6 +4,7 @@ import 'package:test_stacked_web_app/ui/common/app_colors.dart';
 import 'package:test_stacked_web_app/ui/common/app_constants.dart';
 import 'package:test_stacked_web_app/ui/common/ui_helpers.dart';
 import '../../../app/app.router.dart';
+import '../../common/app_strings.dart';
 import '../startup/startup_view.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
@@ -16,51 +17,48 @@ class HomeViewTablet extends ViewModelWidget<HomeViewModel> {
   
   @override
   Widget build(BuildContext context, HomeViewModel viewModel) {
-    return FutureBuilder(
-      future: viewModel.checkBackendAvailability(),
-      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          // If the future is still running (i.e., the backend availability check is still in progress), 
-          // show a loading indicator
-          return const StartupView();
-        }
-        else if (snapshot.hasData && snapshot.data == true) {
-          // If the future has completed successfully and the backend is available, show the main widget
-          return buildMainWidget(context, viewModel);
-        }
-        else {
-          // If the future has completed with an error or the backend is not available, 
-          // show the main widget with an overlay indicating that the backend is not available
-          return Stack(
-            children: [
-              buildMainWidget(context, viewModel),
-              Container(
-                color: Colors.black54,  // Semi-transparent black
-                child: const Center(
-                  child: Text(
-                    'Backend is not available',
-                    style: TextStyle(color: Colors.white, fontSize: 24),
+    if (isBackendAvailable) {
+        // Backend was already found
+        return buildMainWidget(context, viewModel);
+    }
+    else {
+      return FutureBuilder(
+        future: viewModel.checkBackendAvailability(),
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // If the future is still running (i.e., the backend availability check is still in progress), 
+            // show a loading indicator
+            return const StartupView();
+          }
+          else if (snapshot.hasData && snapshot.data == true) {
+            // If the future has completed successfully and the backend is available, show the main widget
+            isBackendAvailable = true;
+            return buildMainWidget(context, viewModel);
+          }
+          else {
+            // If the future has completed with an error or the backend is not available, 
+            // show the main widget with an overlay indicating that the backend is not available
+            return Stack(
+              children: [
+                buildMainWidget(context, viewModel),
+                Container(
+                  color: Colors.black54,  // Semi-transparent black
+                  child: const Center(
+                    child: Text(
+                      'Backend is not available',
+                      style: TextStyle(color: Colors.white, fontSize: 24),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          );
-        }
-      },
-    );
+              ],
+            );
+          }
+        },
+      );
+    }
   }
 
   Widget buildMainWidget(BuildContext context, HomeViewModel viewModel) {
-    String recordingTitleText = 'Provide the title of the recording:';
-    String recordingDescriptionText = 'Describe the content to help the AI:';
-    String emailText = 'Please provide your email address so that we can send you the summary:';
-    String nameText = 'Please allow us to address you with your name:';
-    String modelKeyText = 'Finally please provide your OpenAI key:';
-    String recordingTitleHint = 'Title';
-    String recordingDescriptionHint = 'Description';
-    String emailHint = 'Email';
-    String nameHint = 'Name';
-    String modelKeyHint = 'sk-...';
 
     return Scaffold(
       body: SafeArea(
@@ -147,6 +145,17 @@ class HomeViewTablet extends ViewModelWidget<HomeViewModel> {
                       controller: viewModel.nameController,
                       decoration: InputDecoration(
                         hintText: nameHint,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(
+                      height: 25,
+                    ),
+                    Text(budgetText),
+                    TextField(
+                      controller: viewModel.budgetController,
+                      decoration: InputDecoration(
+                        hintText: budgetHint,
                       ),
                       textAlign: TextAlign.center,
                     ),
