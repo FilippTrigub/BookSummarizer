@@ -30,6 +30,10 @@
 /UI/.pub-cache/
 /UI/.pub/
 /UI/build/
+/UI/**.cmake
+/UI/**.swift
+/UI/**.cc
+/UI/**.h
 
 # Symbolication related
 /UI/app.*.symbols
