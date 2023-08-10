@@ -6,6 +6,7 @@ import whisper
 from dotenv import load_dotenv
 
 from huggingsound import SpeechRecognitionModel
+from docx import Document
 
 from src.GlobalLogger import log_info
 
@@ -55,18 +56,31 @@ class Transcriber:
 
 
 def save_list_to_file(filename: str, to_be_saved_list: List[str]):
-    log_info(f'Save list to file: {filename}')
     try:
-        log_info('Making directory.')
         os.makedirs(os.path.dirname(filename), exist_ok=True)
-        with open(filename, 'w') as file:
-            log_info('Saving to file.')
-            for text in to_be_saved_list:
-                file.write(text)
+        doc = Document()
+
+        for text in to_be_saved_list:
+            doc.add_paragraph(text)
+
+        doc.save(filename)
         return True
     except Exception as e:
-        log_info(f"An error occurred while saving the file: {str(e)}")
+        print(f"An error occurred while saving the Word file: {str(e)}")
         return False
+    # log_info(f'Save list to file: {filename}')
+    # try:
+    #     log_info('Making directory.')
+    #     os.makedirs(os.path.dirname(filename), exist_ok=True)
+    #     with open(filename, 'w') as file:
+    #         log_info('Saving to file.')
+    #         for text in to_be_saved_list:
+    #             file.write(text)
+    #     return True
+    # except Exception as e:
+    #     log_info(f"An error occurred while saving the file: {str(e)}")
+    #     return False
+    #
 
 
 def save_dict_to_file(filename: str, dictionary: Dict[str, str]):
