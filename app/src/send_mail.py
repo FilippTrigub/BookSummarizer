@@ -14,18 +14,13 @@ def send_mail(recipient_email, subject, attachment_paths, book_title):
     smtp_server = 'smtp.dreamhost.com'
     port = 465  # For ssl
     sender_email = "filipp@trigub.tech"
-    password = "E5M#z&Sczf7kerHy" # "Mf@ttA6GqtmK9&zn"
+    password = "E5M#z&Sczf7kerHy"
 
     # Create a multipart message
     msg = MIMEMultipart()
     msg['From'] = sender_email
     msg['To'] = recipient_email
     msg['Subject'] = subject
-
-    # Add your message body
-    log_info(os.getcwd())
-    log_info(os.listdir())
-    msg.attach(MIMEText(email_text, 'utf-8'))
 
     # Open the file in binary mode
     for path in attachment_paths:
@@ -47,6 +42,11 @@ def send_mail(recipient_email, subject, attachment_paths, book_title):
 
         # Add attachment to message
         msg.attach(part)
+
+    # Add your message body
+    html = email_text.replace('book_title', book_title)
+    # msg.attach(MIMEText(email_text, 'utf-8'))
+    msg.attach(MIMEText(html, "html"))
 
     # Use the SMTP server to send the email
     server = smtplib.SMTP_SSL(smtp_server, port)
