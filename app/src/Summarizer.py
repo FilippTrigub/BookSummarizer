@@ -18,8 +18,8 @@ class Summarizer:
 
     DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS = None
     DEFAULT_TIMEOUT_IN_MIN_PER_100000_CHARS = None
-    MODEL_NAME = "text-davinci-002"
-    MAX_INPUT_TOKENS = 2000
+    MODEL_NAME = "gpt-3.5-turbo-16k"
+    MAX_INPUT_TOKENS = 14000
 
     TOKEN_THRESHOLD = None
 
