@@ -7,4 +7,7 @@
     <orderEntry type="jdk" jdkName="BookSummarizer" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
+  <component name="SonarLintModuleSettings">
+    <option name="uniqueId" value="a0d95742-5111-49ca-bd68-6f531b58bfae" />
+  </component>
 </module>

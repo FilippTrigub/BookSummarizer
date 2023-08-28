@@ -2,7 +2,6 @@ import os
 import shutil
 import threading
 import openai
-import uvicorn
 
 from datetime import datetime
 from typing import List
@@ -173,21 +172,21 @@ def set_up_params(user_input: UserInput):
     return transcription_path, book_summary_path, chapter_summary_path, costs_path
 
 
-if __name__ == "__main__":
-    log_info('Start App')
-    # uvicorn.run(app, host=HOST_IFACE, port=APP_PORT)
+# if __name__ == "__main__":
+#     log_info('Start App')
+#     uvicorn.run(app, host=HOST_IFACE, port=APP_PORT)
 
-    user_input = UserInput
-    user_input.title = 'test'
-    user_input.email = 'filipp.trigub@gmail.com'
-    user_input.file_name = 'test.mp3'
-    user_input.delimiters = ['test']
-    user_input.description = ' test'
-    user_input.name = 'test'
-    user_input.model_key = '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'
-    user_input.budget = '1'
-    send_mail(recipient_email=user_input.email,
-              subject='Your Summary is here!',
-              attachment_paths=['book_summaries\\2023_08_10_09_55_40_test.docx', 'chapter_summaries\\2023_08_10_09_55_40_test.docx'],
-              book_title='test')
+    # user_input = UserInput
+    # user_input.title = 'test'
+    # user_input.email = 'filipp.trigub@gmail.com'
+    # user_input.file_name = 'test.mp3'
+    # user_input.delimiters = ['test']
+    # user_input.description = ' test'
+    # user_input.name = 'test'
+    # user_input.model_key = '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'
+    # user_input.budget = '1'
+    # send_mail(recipient_email=user_input.email,
+    #           subject='Your Summary is here!',
+    #           attachment_paths=['book_summaries\\2023_08_10_09_55_40_test.docx', 'chapter_summaries\\2023_08_10_09_55_40_test.docx'],
+    #           book_title='test')
     # transcribe_and_summarize(user_input)
