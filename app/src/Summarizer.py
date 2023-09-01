@@ -8,6 +8,7 @@ from typing import List, Tuple
 import tiktoken
 import openai
 from dotenv import load_dotenv
+from urllib3.exceptions import ReadTimeoutError
 
 from src.GlobalLogger import log_info
 from src.Transcriber import save_list_to_file, save_dict_to_file
@@ -24,6 +25,8 @@ class Summarizer:
     TOKEN_THRESHOLD = None
 
     def __init__(self):
+        self.MODEL_TEMPERATURE = 0.2
+        self.MAX_OUTPUT_TOKENS = 1000
         self.book_title = None
         self.TOKEN_THRESHOLD = float(os.getenv('CASH_THRESHOLD')) * 1000 / 0.02
         self.DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS = int(os.getenv('DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS'))
@@ -185,11 +188,10 @@ class Summarizer:
                 Be sure to use statements as concise and precise as possible. 
                 Review the answer to make sure it fits the format.                 
 
-                INPUT TEXT: \n\n
-                {chunk}
+                INPUT TEXT: \n
             """
 
-        summary = self.generate_completion(prompt)
+        summary = self.generate_completion(prompt, chunk)
         self.TOKENS_USED += self._num_tokens_from_string(prompt)
         return summary
 
@@ -281,14 +283,29 @@ class Summarizer:
         else:
             return self.split_into_chunks(part)
 
-    def generate_completion(self, prompt: str):
-        response = openai.Completion.create(
-            engine=self.MODEL_NAME,
-            prompt=prompt,
-            temperature=0.2,
-            max_tokens=1000
-        )
-        return response.choices[0].text.strip()
+    def generate_completion(self, prompt: str, chunk: str):
+        attempts_left = 2
+        response = None
+        while attempts_left >= 0 and not response:
+            try:
+                response = openai.ChatCompletion.create(
+                    model=self.MODEL_NAME,
+                    temperature=self.MODEL_TEMPERATURE,
+                    max_tokens=self.MAX_OUTPUT_TOKENS,
+                    messages=[
+                        {"role": "system",
+                         "content": prompt},
+                        {"role": "user",
+                         "content": chunk}
+                    ]
+                )
+            except ReadTimeoutError:
+                if attempts_left > 1:
+                    attempts_left -= 1
+                else:
+                    raise ReadTimeoutError
+
+        return response.choices[0].message['content'].strip()
 
     def format_summaries(self, summary_of_book, summaries_of_parts):
         summary_of_book = f'Summary of {self.book_title}:\n\n' + summary_of_book
