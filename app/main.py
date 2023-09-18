@@ -5,6 +5,8 @@ import openai
 
 from datetime import datetime
 from typing import List
+
+import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
@@ -172,9 +174,9 @@ def set_up_params(user_input: UserInput):
     return transcription_path, book_summary_path, chapter_summary_path, costs_path
 
 
-# if __name__ == "__main__":
-#     log_info('Start App')
-#     uvicorn.run(app, host=HOST_IFACE, port=APP_PORT)
+if __name__ == "__main__":
+    log_info('Start App')
+    uvicorn.run(app, host=HOST_IFACE, port=APP_PORT)
 
     # user_input = UserInput
     # user_input.title = 'test'

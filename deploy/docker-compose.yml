@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: audiosummarizeracr.azurecr.io/api
+    image: trigubtechnologiesprojectsacr.azurecr.io/audiosummarizer-api
     build:
       context: ../app
       dockerfile: Dockerfile
@@ -12,20 +12,20 @@ services:
     networks:
       - audio-summarizer-network
 
-  ui:
-    image: audiosummarizeracr.azurecr.io/ui
-    build:
-      context: ../UI
-      dockerfile: Dockerfile
-      args:
-        - API_URI=http://localhost:8081
-    restart: always
-    ports:
-      - 80:80
-    depends_on:
-      - app
-    networks:
-      - audio-summarizer-network
+#  ui:
+#    image: trigubtechnologiesprojectsacr.azurecr.io/audiosummarizer-ui
+#    build:
+#      context: ../UI
+#      dockerfile: Dockerfile
+#      args:
+#        - API_URI=http://localhost:8081
+#    restart: always
+#    ports:
+#      - 80:80
+#    depends_on:
+#      - app
+#    networks:
+#      - audio-summarizer-network
 
 
 networks:
