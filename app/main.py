@@ -117,7 +117,7 @@ def transcribe_and_summarize(user_input: UserInput):
     log_info('Summarize transcribed text.')
     summary_of_book, summaries_of_parts, tokens_used, text_length = Summarizer().summarize_book(
         text=transcriptions,
-        delimiters = user_input.delimiters,
+        delimiters=user_input.delimiters,
         book_title=user_input.title,
         user_budget=user_input.budget,
         load_text_from_file=False)
