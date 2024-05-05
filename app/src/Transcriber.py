@@ -23,6 +23,7 @@ class Transcriber:
         self.model = self._get_model()
 
     def transcribe(self, audio_paths, fp16=False):
+        log_info(f'Transcribing audio files with {self.model_source}.')
         if self.model_source == 'whisper':
             transcriptions = self.model.transcribe(audio_paths, fp16=fp16)
         else:
@@ -31,12 +32,15 @@ class Transcriber:
         return self.get_texts(transcriptions)
 
     def _get_model_source(self):
+        log_info('Get model source.')
         model_source = os.getenv("MODEL_SOURCE")
         if model_source not in ["whisper", "huggingface"]:
             raise ValueError("MODEL_SOURCE must be either 'whisper' or 'huggingface'")
+        log_info(f'Model source: {model_source}')
         return model_source
 
     def _get_model(self):
+        log_info('Get model.')
         if self.model_source == "whisper":
             model_path = os.path.join("src", "whisper_model", "base.pt")
             if os.path.exists(model_path):
@@ -49,6 +53,7 @@ class Transcriber:
             return SpeechRecognitionModel("jonatasgrosman/wav2vec2-large-xlsr-53-english")
 
     def get_texts(self, transcriptions):
+        log_info('Get texts from transcriptions.')
         if self.model_source == "whisper":
             return transcriptions["text"]
         elif self.model_source == "huggingface":
@@ -56,6 +61,7 @@ class Transcriber:
 
 
 def save_list_to_file(filename: str, to_be_saved_list: List[str]):
+    log_info(f'Save list to file: {filename}')
     try:
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         doc = Document()
@@ -96,11 +102,16 @@ def save_dict_to_file(filename: str, dictionary: Dict[str, str]):
 
 
 if __name__ == '__main__':
-
-    audiobooks = [file for file in os.listdir('audiobooks') if file.endswith('.mp3')]
-
     transcriber = Transcriber()
 
-    for audiobook in audiobooks:
-        transcriptions = transcriber.transcribe(os.path.join('audiobooks', audiobook))
-        save_list_to_file(os.path.join('../transcriptions', audiobook.replace('.mp3', '.txt')), transcriptions)
+    # audiobooks = [file for file in os.listdir('audiobooks') if file.endswith('.mp3')]
+
+    #
+    # for audiobook in audiobooks:
+    #     transcriptions = transcriber.transcribe(os.path.join('audiobooks', audiobook))
+    #     save_list_to_file(os.path.join('../transcriptions', audiobook.replace('.mp3', '.txt')), transcriptions)
+
+
+    audiobook = 'Rainer_Sachse_personality_types_converted.mp3'
+    transcriptions = transcriber.transcribe(audiobook)
+    save_list_to_file(os.path.join('../transcriptions', audiobook.replace('.mp3', '.txt')), transcriptions)
