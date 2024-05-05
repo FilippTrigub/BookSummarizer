@@ -10,8 +10,8 @@ import openai
 from dotenv import load_dotenv
 from urllib3.exceptions import ReadTimeoutError
 
-from src.GlobalLogger import log_info
-from src.Transcriber import save_list_to_file, save_dict_to_file
+from app.src.GlobalLogger import log_info
+from app.src.Transcriber import save_list_to_file, save_dict_to_file
 
 
 class Summarizer:

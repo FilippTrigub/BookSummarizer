@@ -12,10 +12,10 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from src.GlobalLogger import log_info
-from src.Summarizer import Summarizer
-from src.Transcriber import Transcriber, save_list_to_file, save_dict_to_file
-from src.send_mail import send_mail
+from app.src.GlobalLogger import log_info
+from app.src.Summarizer import Summarizer
+from app.src.Transcriber import Transcriber, save_list_to_file, save_dict_to_file
+from app.src.send_mail import send_mail
 
 app = FastAPI(title='Audio Summarizer', debug=True)
 app.add_middleware(

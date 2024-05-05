@@ -5,8 +5,8 @@ from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email import encoders
 
-from src.GlobalLogger import log_info
-from src.email_text import email_text
+from app.src.GlobalLogger import log_info
+from app.src.email_text import email_text
 
 
 def send_mail(recipient_email, subject, attachment_paths, book_title):

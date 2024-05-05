@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from huggingsound import SpeechRecognitionModel
 from docx import Document
 
-from src.GlobalLogger import log_info
+from app.src.GlobalLogger import log_info
 
 
 class Transcriber:
@@ -114,4 +114,4 @@ if __name__ == '__main__':
 
     audiobook = 'Rainer_Sachse_personality_types_converted.mp3'
     transcriptions = transcriber.transcribe(audiobook)
-    save_list_to_file(os.path.join('../transcriptions', audiobook.replace('.mp3', '.txt')), transcriptions)
+    save_list_to_file(os.path.join('transcriptions', audiobook.replace('.mp3', '.txt')), transcriptions)
