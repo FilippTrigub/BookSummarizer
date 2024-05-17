@@ -23,17 +23,6 @@ class Transcriber:
         self.model = self._get_model()
         self.audio = None
 
-    def prepare_audio(self, audio_path):
-        self.audio = whisper.load_audio(audio_path)
-
-    def detect_language(self):
-        audio_trimmed = whisper.pad_or_trim(self.audio)
-        # make log-Mel spectrogram and move to the same device as the model
-        mel = whisper.log_mel_spectrogram(audio_trimmed).to(self.model.device)
-        # detect the spoken language
-        _, probs = self.model.detect_language(mel)
-        log_info(f"Detected language: {max(probs, key=probs.get)}")
-
     def transcribe(self, audio_path, fp16=False):
         log_info(f'Transcribing audio files with {self.model_source}.')
         if self.model_source == 'whisper':
@@ -45,6 +34,17 @@ class Transcriber:
             transcriptions = self.model.transcribe(audio_path)
         log_info('Transcription done.')
         return self.get_texts(transcriptions)
+
+    def prepare_audio(self, audio_path):
+        self.audio = whisper.load_audio(audio_path)
+
+    def detect_language(self):
+        audio_trimmed = whisper.pad_or_trim(self.audio)
+        # make log-Mel spectrogram and move to the same device as the model
+        mel = whisper.log_mel_spectrogram(audio_trimmed).to(self.model.device)
+        # detect the spoken language
+        _, probs = self.model.detect_language(mel)
+        log_info(f"Detected language: {max(probs, key=probs.get)}")
 
     def _get_model_source(self):
         log_info('Get model source.')
