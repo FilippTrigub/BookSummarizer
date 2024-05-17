@@ -2,7 +2,7 @@ FROM python:3.10.12-slim
 
 WORKDIR /app
 
-COPY .env.template .env
+COPY ../.env.template .env
 COPY __init__.py __init__.py
 COPY main.py main.py
 COPY src src

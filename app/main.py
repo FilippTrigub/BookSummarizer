@@ -12,10 +12,10 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from src.GlobalLogger import log_info
-from src.Summarizer import Summarizer
-from src.Transcriber import Transcriber, save_list_to_file, save_dict_to_file
-from src.send_mail import send_mail
+from app.src.GlobalLogger import log_info
+from app.src.Summarizer import Summarizer
+from app.src.Transcriber import Transcriber, save_list_to_file, save_dict_to_file
+from app.src.send_mail import send_mail
 
 app = FastAPI(title='Audio Summarizer', debug=True)
 app.add_middleware(
@@ -175,20 +175,54 @@ def set_up_params(user_input: UserInput):
 
 
 if __name__ == "__main__":
-    log_info('Start App')
-    uvicorn.run(app, host=HOST_IFACE, port=APP_PORT)
+    # log_info('Start App')
+    # uvicorn.run(app, host=HOST_IFACE, port=APP_PORT)
 
-    # user_input = UserInput
-    # user_input.title = 'test'
+    user_input = UserInput(
+        title='Raiener Sachse - Persönlichkeitsstile und Verhalten',
+        email='filipp.trigub@gmail.com',
+        name='Filipp Trigub',
+        file_name='Rainer_Sachse_personality_types_converted.mp3',
+        delimiters=[
+            'Kapitel 1',
+            'Kapitel 2',
+            'Kapitel 3',
+            'Kapitel 4',
+            'Kapitel 5',
+            'Kapitel 6',
+            'Kapitel 7',
+            'Kapitel 8',
+            'Kapitel 9',
+            'Kapitel 10',
+            'Kapitel 11',
+            'Kapitel 12',
+            'Kapitel 13',
+        ],
+        description=' Eine Beschreibung von Persönlichkeitsstilen und wie sie sich auf das Verhalten auswirken.',
+        model_key='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',
+        budget='3'
+    )
+    transcribe_and_summarize(user_input)
+
+    # user_input.title = 'Raiener Sachse - Persönlichkeitsstile und Verhalten'
     # user_input.email = 'filipp.trigub@gmail.com'
-    # user_input.file_name = 'test.mp3'
-    # user_input.delimiters = ['test']
-    # user_input.description = ' test'
+    # user_input.file_name = 'Rainer_Sachse_personality_types.m4b'
+    # user_input.delimiters = [
+    #     'Kapitel 1',
+    #     'Kapitel 2',
+    #     'Kapitel 3',
+    #     'Kapitel 4',
+    #     'Kapitel 5',
+    #     'Kapitel 6',
+    #     'Kapitel 7',
+    #     'Kapitel 8',
+    #     'Kapitel 9',
+    #     'Kapitel 10',
+    #     'Kapitel 11',
+    #     'Kapitel 12',
+    #     'Kapitel 13',
+    # ]
+    # user_input.description = ' Eine Beschreibung von Persönlichkeitsstilen und wie sie sich auf das Verhalten auswirken.'
     # user_input.name = 'test'
     # user_input.model_key = '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'
-    # user_input.budget = '1'
-    # send_mail(recipient_email=user_input.email,
-    #           subject='Your Summary is here!',
-    #           attachment_paths=['book_summaries\\2023_08_10_09_55_40_test.docx', 'chapter_summaries\\2023_08_10_09_55_40_test.docx'],
-    #           book_title='test')
-    # transcribe_and_summarize(user_input)
+    # user_input.budget = '3'
