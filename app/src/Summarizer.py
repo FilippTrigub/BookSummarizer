@@ -19,12 +19,13 @@ class Summarizer:
 
     DEFAULT_LOOP_THRESHOLD_PER_100000_CHARS = None
     DEFAULT_TIMEOUT_IN_MIN_PER_100000_CHARS = None
-    MODEL_NAME = os.getenv('GENERATOR_MODEL')
+    MODEL_NAME = None
     MAX_INPUT_TOKENS = 14000
 
     TOKEN_THRESHOLD = None
 
     def __init__(self):
+        self.MODEL_NAME = os.getenv('GENERATOR_MODEL')
         self.MODEL_TEMPERATURE = 0.2
         self.MAX_OUTPUT_TOKENS = 1000
         self.book_title = None
@@ -147,21 +148,33 @@ class Summarizer:
                 Your task is to merge these summaries.
                 You should use 20 bullet points.
                 Summarize according to the following four points.
-                - What are the main statements in the text?
-                - What is the core problem the author addresses?
-                - What are points of nuance the author highlights?
-                - What are open questions the author points out?
+                - What are the main points derived by the author?
+                - What are actionable recommendations provided by the author?
+                - What are caveats the author highlights?
                 Follow the output format under any circumstances.                  
 
                 OUTPUT FORMAT: \n\n
-                Summary: \n
+                SUMMARY: \n\n
+                Main Points:\n
                 1: xxx.\n 
                 2: xxx.\n 
                 ...\n  
-                N: xxx.\n\n     
+                N: xxx.\n\n   
+                Recommendations:\n
+                1: xxx.\n 
+                2: xxx.\n 
+                ...\n  
+                N: xxx.\n\n   
+                Caveats:\n
+                1: xxx.\n 
+                2: xxx.\n 
+                ...\n  
+                N: xxx.\n\n   
 
-                Be sure to use statements as concise and precise as possible. 
-                Review the answer to make sure it fits the format.                 
+                Be sure to use statements as concise and precise.
+                Base all your statements directly on the text. 
+                Review the answer to make sure it fits the format. 
+                Provide 1 complete summary of all previously made summaries.                
 
                 INPUT TEXT: \n\n
                 {chunk}
@@ -173,21 +186,33 @@ class Summarizer:
                 You will be given a text, which is part of the book {self.book_title}. 
                 Your task is to summarize the text in 10 points.
                 Summarize according to the following four points.
-                - What are the main statements in the text?
-                - What is the core problem the author addresses?
-                - What are points of nuance the author highlights?
-                - What are open questions the author points out?
+                Summarize according to the following four points.
+                - What are the main points derived by the author?
+                - What are actionable recommendations provided by the author?
+                - What are caveats the author highlights?
                 Follow the output format under any circumstances.                  
 
                 OUTPUT FORMAT: \n\n
-                Summary: \n
+                SUMMARY: \n\n
+                Main Points:\n
                 1: xxx.\n 
                 2: xxx.\n 
                 ...\n  
-                N: xxx.\n\n     
+                N: xxx.\n\n   
+                Recommendations:\n
+                1: xxx.\n 
+                2: xxx.\n 
+                ...\n  
+                N: xxx.\n\n   
+                Caveats:\n
+                1: xxx.\n 
+                2: xxx.\n 
+                ...\n  
+                N: xxx.\n\n   
 
-                Be sure to use statements as concise and precise as possible. 
-                Review the answer to make sure it fits the format.                 
+                Be sure to use statements as concise and precise.
+                Base all your statements directly on the text. 
+                Review the answer to make sure it fits the format.               
 
                 INPUT TEXT: \n
             """
@@ -356,12 +381,12 @@ if __name__ == '__main__':
     save_list_to_file(
         os.path.join(
             'book_summaries',
-            timestamp + book_file_name),
+            timestamp + '_' + book_file_name),
         [summary_of_book])
     save_list_to_file(
         os.path.join(
             'chapter_summaries',
-            timestamp + book_file_name),
+            timestamp + '_' + book_file_name),
         summaries_of_parts)
 
     log_info(f"Used up {tokens_used} tokens.\n"
@@ -369,7 +394,7 @@ if __name__ == '__main__':
              f"This is {tokens_used * 0.02 / 1000 / text_length * 1000} $ per 1000 characters.")
 
     save_dict_to_file(
-        os.path.join('openai_costs', timestamp + book_file_name[:-4] + '.json'),
+        os.path.join('openai_costs', timestamp + '_' + book_file_name[:-4] + '.json'),
         {'book_title': book_file_name[:-4],
          'text_length': text_length,
          'tokens_used': tokens_used,
