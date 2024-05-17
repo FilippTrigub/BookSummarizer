@@ -34,15 +34,15 @@ class Transcriber:
         _, probs = self.model.detect_language(mel)
         log_info(f"Detected language: {max(probs, key=probs.get)}")
 
-    def transcribe(self, audio_paths, fp16=False):
+    def transcribe(self, audio_path, fp16=False):
         log_info(f'Transcribing audio files with {self.model_source}.')
         if self.model_source == 'whisper':
             if not self.audio:
-                self.prepare_audio(audio_paths)
+                self.prepare_audio(audio_path)
             self.detect_language()
             transcriptions = self.model.transcribe(self.audio, fp16=fp16)
         else:
-            transcriptions = self.model.transcribe(audio_paths)
+            transcriptions = self.model.transcribe(audio_path)
         log_info('Transcription done.')
         return self.get_texts(transcriptions)
 
